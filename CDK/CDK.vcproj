@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="AttitudeMFD"
-	ProjectGUID="{1F32DE1D-D5E7-43AE-BF4C-8FA0BB136A4E}"
-	RootNamespace="AttitudeMFD"
+	Name="CDK"
+	ProjectGUID="{D4231D5E-8B7B-4745-ACE5-632B8038EECE}"
+	RootNamespace="CDK"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -40,7 +40,6 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\Orbiter2016\Orbitersdk\include;C:\Users\chris\AttitudeMFD\CDK"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -162,96 +161,12 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath=".\AttitudeMFD.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\CDK.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="c:\"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\CDK\Control.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="c:\"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\CDK\EI.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\Elements.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\OrbiterMath.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\Prediction.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TargetObj.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\AttitudeMFD.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\CDK.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\Control.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\EI.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\Elements.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\GravBodyData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\OrbiterMath.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\Prediction.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TargetObj.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

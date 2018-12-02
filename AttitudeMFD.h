@@ -8,8 +8,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AUTOPILOT_MFD_H
 #define AUTOPILOT_MFD_H
-#include <fstream.h>
-#include <iomanip.h>
+//#include <fstream.h>
+//#include <iomanip.h>
 #include "TargetObj.h"
 #include "List.h"
 #include "CDK.h"
