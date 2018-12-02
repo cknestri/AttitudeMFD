@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# VS Build directories
+Debug
+
+# VS project files
+*.ncb

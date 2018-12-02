@@ -75,16 +75,6 @@ void inline GetRotMatrixZ(double Angle, MATRIX3 &RotMatrixZ)
 // Note that some of these vector operations have actually been added into the new version of 
 // Orbiter.
 
-// Divide a vector by a scalar double
-inline VECTOR3 operator/ (const VECTOR3 &a, double b)
-{
-	VECTOR3 c;
-	c.x = a.x / b;
-	c.y = a.y / b;
-	c.z = a.z / b;
-
-	return c;
-}
 
 // Divide a vector by an integer scalar
 inline VECTOR3 operator/ (const VECTOR3 &a, int b)
@@ -109,17 +99,6 @@ inline double operator* (const VECTOR3 &a, const VECTOR3 &b)
 	return (c.x + c.y + c.z);
 }
 
-// Negate
-inline VECTOR3 operator- (const VECTOR3 &a)
-{
-	VECTOR3 b;
-
-	b.x = -a.x;
-	b.y = -a.y;
-	b.z = -a.z;
-
-	return b;
-}
 
 // Are the vectors equal?
 inline double operator== (const VECTOR3 &a, const VECTOR3 &b)
@@ -185,13 +164,13 @@ static inline double KM(double m)
 inline void ScaleOutput(char *Buffer, double Value)
 {
 	if (fabs(Value) < 1000) {
-		sprintf(Buffer, "%.2f", Value);
+		sprintf_s(Buffer, 10, "%.2f", Value);
 	} else if (fabs(Value) < 1000000) {
-		sprintf(Buffer, "%.2fk", Value/1000);
+		sprintf_s(Buffer, 10, "%.2fk", Value/1000);
 	} else if (fabs(Value) < 1495978707) {		// 1 A.U. / 100 
-		sprintf(Buffer, "%.2fM", Value/1000000);
+		sprintf_s(Buffer, 10, "%.2fM", Value/1000000);
 	} else {
-		sprintf(Buffer, "%.2fAU", Value/1495978707);
+		sprintf_s(Buffer, 10, "%.2fAU", Value/1495978707);
 	}
 
 }

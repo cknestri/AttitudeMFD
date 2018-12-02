@@ -1512,7 +1512,7 @@ bool cbSetMode(void *id, char *str, void *data)
 bool AttitudeMFD::SetRelAttitude(char *str, AXIS Axis)
 {
 	// This allows a space to represent a decimal point
-	for (int i = 0; i < strlen(str); i++) {
+	for (unsigned int i = 0; i < strlen(str); i++) {
 		if (str[i] == ' ') {
 			str[i] = '.';
 			break;

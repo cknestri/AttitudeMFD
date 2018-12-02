@@ -19,7 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="2"
 			>
 			<Tool
@@ -40,6 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="C:\Orbiter2016\Orbitersdk\include"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -56,15 +57,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				GenerateDebugInformation="true"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -74,9 +70,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -161,12 +154,64 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\CDK.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Control.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\EI.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Elements.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\OrbiterMath.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Prediction.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\CDK.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Control.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EI.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Elements.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GravBodyData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\OrbiterMath.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Prediction.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
