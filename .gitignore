@@ -31,8 +31,10 @@
 *.out
 *.app
 
+# VS files
+*.suo
+*.ncb
+
 # VS Build directories
 Debug
 
-# VS project files
-*.ncb
