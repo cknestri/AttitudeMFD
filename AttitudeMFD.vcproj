@@ -59,6 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;C:\Orbiter2016\Orbitersdk\lib\Orbitersdk.lib&quot; &quot;C:\Orbiter2016\Orbitersdk\lib\Orbiter.lib&quot;"
 				GenerateDebugInformation="true"
 				ResourceOnlyDLL="true"
 				TargetMachine="1"
@@ -83,6 +84,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(OutDir)\AttitudeMFD.dll C:\Orbiter2016\Modules\Plugin"
 			/>
 		</Configuration>
 		<Configuration
