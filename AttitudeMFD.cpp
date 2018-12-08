@@ -64,7 +64,7 @@ DLLCLBK void ExitModule (HINSTANCE hDLL)
 }
 
 
-DLLCLBK void opcTimestep(double SimT, double SimDT, double mjd)
+DLLCLBK void opcPostStep(double SimT, double SimDT, double mjd)
 {
 	if (g_AttitudeMFD.CurrentMFD1 != NULL) {
 		g_AttitudeMFD.CurrentMFD1->UpdateState(SimDT);
