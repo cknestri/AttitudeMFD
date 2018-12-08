@@ -45,11 +45,12 @@ static struct {
 } g_AttitudeMFD;
 
 
-DLLCLBK void opcDLLInit (HINSTANCE hDLL)
+DLLCLBK void InitModule(HINSTANCE hDLL)
 {
 	static char *name = "Attitude";
-	MFDMODESPEC spec;
+	MFDMODESPECEX spec;
 	spec.name    = name;
+	spec.context = NULL;
 	spec.key     = OAPI_KEY_U;
 	spec.msgproc = AttitudeMFD::MsgProc;
 
@@ -57,7 +58,7 @@ DLLCLBK void opcDLLInit (HINSTANCE hDLL)
 	g_AttitudeMFD.SavedStatus.ValidStatus = false;
 }
 
-DLLCLBK void opcDLLExit (HINSTANCE hDLL)
+DLLCLBK void ExitModule (HINSTANCE hDLL)
 {
 	oapiUnregisterMFDMode (g_AttitudeMFD.mode);
 }

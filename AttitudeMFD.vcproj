@@ -91,7 +91,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -114,10 +114,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="C:\Orbiter2016\Orbitersdk\include;C:\Users\chris\AttitudeMFD\CDK"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4244;4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -130,6 +132,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;C:\Orbiter2016\Orbitersdk\lib\Orbitersdk.lib&quot; &quot;C:\Orbiter2016\Orbitersdk\lib\Orbiter.lib&quot;"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -155,6 +158,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(OutDir)\AttitudeMFD.dll C:\Orbiter2016\Modules\Plugin"
 			/>
 		</Configuration>
 	</Configurations>
