@@ -50,7 +50,7 @@ const double UPDATE_INTERVAL = 1.0;		// How much time should pass between update
 // For ease of accessing the target list
 #define CurrentTarget (TargetList.GetCurrent()).GetObj()
 
-class AttitudeMFD: public MFD2 {
+class AttitudeMFD: public MFD {
 public:
 
 	AttitudeMFD(DWORD w, DWORD h, VESSEL *vessel);
