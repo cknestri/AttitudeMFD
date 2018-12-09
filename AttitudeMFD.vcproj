@@ -218,6 +218,10 @@
 				RelativePath=".\TargetObj.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\UserAttitudeModeController.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -249,6 +253,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IAttitudeModeController.h"
+				>
+			</File>
+			<File
 				RelativePath=".\List.h"
 				>
 			</File>
@@ -262,6 +270,10 @@
 			</File>
 			<File
 				RelativePath=".\TargetObj.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UserAttitudeModeController.h"
 				>
 			</File>
 		</Filter>
