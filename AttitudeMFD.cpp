@@ -15,6 +15,7 @@
 #include "Orbitersdk.h"
 #include "AttitudeMFD.h"
 #include "CDK.h"
+#include "AttitudeModeControllerFactory.h"
 
 static struct {  
 	int mode;
@@ -77,7 +78,7 @@ DLLCLBK void opcPostStep(double SimT, double SimDT, double mjd)
 
 
 AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
-: MFD (w, h, vessel)
+: MFD2 (w, h, vessel)
 {
 	// First, for the callback
 	if (!g_AttitudeMFD.CurrentMFD1) {
@@ -101,6 +102,8 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	MaxMainThrust = Spacecraft->GetMaxThrust(ENGINE_MAIN);
 	MaxRetroThrust = Spacecraft->GetMaxThrust(ENGINE_RETRO);
 	MaxHoverThrust = Spacecraft->GetMaxThrust(ENGINE_HOVER);
+
+	m_attitudeModeController = GetAttitudeModeController(RefMode, Spacecraft, w, h);
 
 	// Let's prime the pump :-)  We'll just lie about the time
 	UpdateState(1.0);
@@ -306,6 +309,7 @@ void inline AttitudeMFD::UpdateState(double TimeStep)
 
 	switch (RefMode) {
 	case USER_ATT:
+		m_attitudeModeController->UpdateState();
 		CalcAttitude();	
 		break;
 	case VELOCITY:
@@ -608,9 +612,13 @@ void inline AttitudeMFD::Trim()
 
 }
 
-void AttitudeMFD::Update(HDC hdc)
+bool AttitudeMFD::Update(oapi::Sketchpad* sketchpad)
 {
-
+	return m_attitudeModeController->Update(sketchpad);
+}
+/*
+void AttitudeMFD::Update(oapi::Sketchpad* sketchpad)
+{
 	CurrentLine = 0;
 	hDC = hdc;
 
@@ -619,7 +627,8 @@ void AttitudeMFD::Update(HDC hdc)
 
 	switch (RefMode) {
 	case USER_ATT:
-		DisplayAttitude();	
+		m_attitudeModeController->Update(hdc);
+		//DisplayAttitude();
 		break;
 	case VELOCITY:
 		DisplayVelocity();
@@ -633,6 +642,7 @@ void AttitudeMFD::Update(HDC hdc)
 	};
 	
 }
+*/
 
 
 void AttitudeMFD::DisplayTargetRelative()
@@ -782,8 +792,12 @@ void AttitudeMFD::ChangeRefMode(REF_MODE Mode)
 
 	RefMode = Mode;
 
+	delete m_attitudeModeController;
+	m_attitudeModeController = GetAttitudeModeController(RefMode, Spacecraft, Width, Height);
+
 	switch (Mode) {
 	case USER_ATT:
+		m_attitudeModeController->Start();
 		StartModeAttitude();
 		break;
 	case TARGET_RELATIVE:

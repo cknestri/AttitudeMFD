@@ -175,6 +175,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AttitudeModeControllerFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CDK\CDK.cpp"
 				>
 				<FileConfiguration
@@ -197,6 +201,10 @@
 						AdditionalIncludeDirectories="c:\"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Diaplay.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\CDK\EI.cpp"
@@ -233,11 +241,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AttitudeModeControllerFactory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CDK\CDK.h"
 				>
 			</File>
 			<File
 				RelativePath=".\CDK\Control.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Display.h"
 				>
 			</File>
 			<File
@@ -254,6 +270,10 @@
 			</File>
 			<File
 				RelativePath=".\IAttitudeModeController.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IDisplay.h"
 				>
 			</File>
 			<File

@@ -49,13 +49,13 @@ const double UPDATE_INTERVAL = 1.0;		// How much time should pass between update
 // For ease of accessing the target list
 #define CurrentTarget (TargetList.GetCurrent()).GetObj()
 
-class AttitudeMFD: public MFD {
+class AttitudeMFD: public MFD2 {
 public:
 
 	AttitudeMFD(DWORD w, DWORD h, VESSEL *vessel);
 	~AttitudeMFD();
 
-	void Update (HDC hdc);
+	bool Update(oapi::Sketchpad* sketchpad);
 	void UpdateState(double TimeStep);
 	
 	static int MsgProc (UINT msg, UINT mfd, WPARAM wparam, LPARAM lparam);
@@ -66,7 +66,8 @@ public:
 	void ChangeRefMode(REF_MODE Mode);
 
 private:
-	
+	IAttitudeModeController* m_attitudeModeController;
+
 	// MFD Display-related variables
 	HDC hDC;	
 	DWORD Width, Height;
