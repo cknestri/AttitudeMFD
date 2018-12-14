@@ -17,6 +17,7 @@ public:
 	void Start() override;
 	bool Update(oapi::Sketchpad* sketchpad) override;
 	void UpdateState() override;
+	int UserAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** buttonMenu) const override;
 
 private:
 	VESSEL* m_spacecraft;

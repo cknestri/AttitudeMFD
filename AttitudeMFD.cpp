@@ -922,38 +922,40 @@ bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
 
 int AttitudeMFD::ButtonMenu (const MFDBUTTONMENU **menu) const
 {
-	const int NUM_CMNDS = 22;
+	return m_attitudeModeController->GetButtonMenu(menu);
 
-	static const MFDBUTTONMENU mnu[NUM_CMNDS] = {
-		{"User Att", "Mode", '1'},
-		{"Velocity", "Mode", '2'},
-		{"Target Rel", "Mode", '3'},
-		{"Entry Interface", "Mode", '4'},
-		{"Select Mode", 0, 'M'},
-		{"Set Pitch", 0, 'P'},
-		{"Set Yaw", 0, 'Y'},
-		{"Set Roll", 0, 'R'},
-		{"Attitude Hold", 0, 'H'},
-		{"Set Reference", "Attitude", '.'},
-		{"Toggle Color Mode", 0, 'C'},
+	//const int NUM_CMNDS = 22;
+
+	//static const MFDBUTTONMENU mnu[NUM_CMNDS] = {
+	//	{"User Att", "Mode", '1'},
+	//	{"Velocity", "Mode", '2'},
+	//	{"Target Rel", "Mode", '3'},
+	//	{"Entry Interface", "Mode", '4'},
+	//	{"Select Mode", 0, 'M'},
+	//	{"Set Pitch", 0, 'P'},
+	//	{"Set Yaw", 0, 'Y'},
+	//	{"Set Roll", 0, 'R'},
+	//	{"Attitude Hold", 0, 'H'},
+	//	{"Set Reference", "Attitude", '.'},
+	//	{"Toggle Color Mode", 0, 'C'},
 
 
-		{"Next Target", "(Target Mode)", 'N'},
-		{"Prev Target", "(Target Mode)", 'P'},
-		{"Closest Target", "(Target Mode)", ' '},
-		{"Select Base", "(Target Mode)", 'B'},
+	//	{"Next Target", "(Target Mode)", 'N'},
+	//	{"Prev Target", "(Target Mode)", 'P'},
+	//	{"Closest Target", "(Target Mode)", ' '},
+	//	{"Select Base", "(Target Mode)", 'B'},
 
-	
-		{"Trim Vertical", "(Numpad)", '1'},
-		{"Trim Lateral", "(Numpad)", '2'},
-		{"Trim F/A", "(Numpad)", '3'},
-		{"Trim All", "(Numpad)", '5'},
-		{"Trim Vert, Lat", "(Numpad)", '7'},
-		{"Trim Lat, F/A", "(Numpad)", '8'},
-		{"Trim Vert, F/A", "(Numpad)", '9'}
-	};
-	if (menu) *menu = mnu;
-	return NUM_CMNDS;
+	//
+	//	{"Trim Vertical", "(Numpad)", '1'},
+	//	{"Trim Lateral", "(Numpad)", '2'},
+	//	{"Trim F/A", "(Numpad)", '3'},
+	//	{"Trim All", "(Numpad)", '5'},
+	//	{"Trim Vert, Lat", "(Numpad)", '7'},
+	//	{"Trim Lat, F/A", "(Numpad)", '8'},
+	//	{"Trim Vert, F/A", "(Numpad)", '9'}
+	//};
+	//if (menu) *menu = mnu;
+	//return NUM_CMNDS;
 }
 
 bool AttitudeMFD::SelectTarget(char *Name)
