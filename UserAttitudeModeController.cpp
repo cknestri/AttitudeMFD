@@ -16,6 +16,7 @@ UserAttitudeModeController::UserAttitudeModeController(
 	: m_spacecraft(spacecraft)
 	, m_displayWidth(displayWidth)
 	, m_displayHeight(displayHeight)
+	, m_isAutopilotEngaged(false)
 {
 }
 
@@ -40,7 +41,15 @@ bool UserAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	display->SetTextColor(RGB(0, 255, 0));
 	display->IncrementCurrentLine();
 
-	display->DisplayText("Ref Mode: Attitude");
+	if (m_isAutopilotEngaged)
+	{
+		display->DisplayText("Ref Mode: Attitude (Hold)");
+	}
+	else
+	{
+		display->DisplayText("Ref Mode: Attitude");
+	}
+
 
 	display->DisplayText(
 		"Reference Att: %.1f %.1f %.1f", 
@@ -79,6 +88,26 @@ void UserAttitudeModeController::UpdateState()
 	m_pitchYawRollAngles = CalcPitchYawRollAngles();
 }
 
+void UserAttitudeModeController::EnableAutopilot()
+{
+	m_isAutopilotEngaged = true;
+}
+
+void UserAttitudeModeController::DisableAutopilot()
+{
+	m_isAutopilotEngaged = false;
+}
+
+void UserAttitudeModeController::Control()
+{
+	if (m_isAutopilotEngaged)
+	{
+		SetAttitude(0, m_pitchYawRollAngles.data[PITCH], PITCH, DB_FINE);
+		SetAttitude(0, m_pitchYawRollAngles.data[YAW], YAW, DB_FINE);
+		SetAttitude(0, m_pitchYawRollAngles.data[ROLL], ROLL, DB_FINE);
+	}
+}
+
 void UserAttitudeModeController::SetReferenceAttitude()
 {
 	VESSELSTATUS status;
@@ -87,7 +116,7 @@ void UserAttitudeModeController::SetReferenceAttitude()
 	m_referenceAttitude = status.arot;
 }
 
-int UserAttitudeModeController::GetButtonMenu (const MFDBUTTONMENU** buttonMenu) const
+int UserAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** buttonMenu) const
 {
 	static const MFDBUTTONMENU s_buttonMenu[] = {
 		{"User Att", "Mode", '1'},
@@ -105,6 +134,18 @@ int UserAttitudeModeController::GetButtonMenu (const MFDBUTTONMENU** buttonMenu)
 	*buttonMenu = s_buttonMenu;
 
 	return (sizeof(s_buttonMenu)/sizeof(s_buttonMenu[0]));
+}
+
+bool UserAttitudeModeController::ProcessKey(DWORD key)
+{
+	switch (key)
+	{
+	case OAPI_KEY_PERIOD:
+		SetReferenceAttitude();
+		return true;
+	default:
+		return false;
+	}
 }
 
 void UserAttitudeModeController::CalculateAttitude()

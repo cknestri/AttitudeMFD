@@ -113,6 +113,10 @@ private:
 
 
 	// Functions
+	bool IsModeChangeKey(DWORD key) const;
+	bool IsAttitudeHoldToggleKey(DWORD key) const;
+	bool ProcessModeChangeKey(DWORD key);
+
 	VECTOR3 CalcPitchYawRollAngles();
 
 	void CalcTargetRelative();

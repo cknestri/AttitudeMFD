@@ -17,7 +17,11 @@ public:
 	void Start() override;
 	bool Update(oapi::Sketchpad* sketchpad) override;
 	void UpdateState() override;
+	void EnableAutopilot();
+	void DisableAutopilot();
+	void Control() override;
 	int UserAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** buttonMenu) const override;
+	bool ProcessKey(DWORD key);
 
 private:
 	VESSEL* m_spacecraft;
@@ -27,6 +31,7 @@ private:
 	VECTOR3 m_globalSpacecraftPosition;
 	VECTOR3 m_pitchYawRollAngles;
 	Attitude m_referenceAttitude;
+	bool m_isAutopilotEngaged;
 
 	void CalculateAttitude();
 	void SetReferenceAttitude();

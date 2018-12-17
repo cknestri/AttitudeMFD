@@ -239,6 +239,16 @@ void AttitudeMFD::ToggleAttHoldMode()
 {
 	AttHoldMode = (ATT_HOLD_MODE)((AttHoldMode + 1) % 2);
 
+	if (AttHoldMode == ENGAGED)
+	{
+		m_attitudeModeController->EnableAutopilot();
+	}
+	else
+	{
+		m_attitudeModeController->DisableAutopilot();
+	}
+
+
 	// Stop all engine firings
 	Spacecraft->SetAttitudeRotLevel(NULL_VECTOR);
 }
@@ -471,7 +481,9 @@ void inline AttitudeMFD::CalcEI()
 
 void inline AttitudeMFD::Control()
 {
-	if (AttHoldMode == ENGAGED) {
+	m_attitudeModeController->Control();
+	
+	/*if (AttHoldMode == ENGAGED) {
 		
 		if (RefMode == EI && !Interface.InterfaceDefined) {
 			AttHoldMode = DISENGAGED;
@@ -485,7 +497,7 @@ void inline AttitudeMFD::Control()
 
 	if (TrimStatus == T_ENGAGED) {
 		Trim();
-	}
+	}*/
 }
 
 void inline AttitudeMFD::SetTrimLevelVert()
@@ -815,109 +827,166 @@ void AttitudeMFD::ChangeRefMode(REF_MODE Mode)
 
 bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
 {
-	bool cbSelectTarget(void *id, char *str, void *data);
+	if (IsModeChangeKey(key))
+	{
+		return ProcessModeChangeKey(key);
+	}
+	else if (IsAttitudeHoldToggleKey(key))
+	{
+		ToggleAttHoldMode();
+		
+		return true;
+	}
+	else
+	{
+		return m_attitudeModeController->ProcessKey(key);
+	}
+	//bool cbSelectTarget(void *id, char *str, void *data);
+	//bool cbSetMode(void *id, char *str, void *data);
+	//bool cbSetRelAttPitch(void *id, char *str, void *data);
+	//bool cbSetRelAttYaw(void *id, char *str, void *data);
+	//bool cbSetRelAttRoll(void *id, char *str, void *data);
+
+	//switch(key) {
+	//// Mode keys - the M key only needs to be used as a backup, when the SHIFT + number
+	//// is in use by a vessel, such as the shuttle's RMS
+	//case OAPI_KEY_M:
+	//	oapiOpenInputBox("Select Mode", cbSetMode, 0, 20, (void *)this);
+	//case OAPI_KEY_1:
+	//	ChangeRefMode(USER_ATT);
+	//	return true;
+	//case OAPI_KEY_2:
+	//	ChangeRefMode(VELOCITY);
+	//	return true;
+	//case OAPI_KEY_3:
+	//	ChangeRefMode(TARGET_RELATIVE);
+	//	return true;
+	//case OAPI_KEY_4:
+	//	ChangeRefMode(EI);
+	//	return true;
+
+	//case OAPI_KEY_P:
+	//	if (RefMode != TARGET_RELATIVE) {
+	//		oapiOpenInputBox("Select Pitch", cbSetRelAttPitch, 0, 20, (void *)this);
+	//	} else {
+	//		SelectPrevTarget();
+	//	}
+	//	return true;
+	//case OAPI_KEY_Y:
+	//	if (RefMode != TARGET_RELATIVE) {
+	//		oapiOpenInputBox("Select Yaw", cbSetRelAttYaw, 0, 20, (void *)this);
+	//	}
+	//	return true;
+	//case OAPI_KEY_R:
+	//	if (RefMode != TARGET_RELATIVE) {
+	//		oapiOpenInputBox("Select Roll", cbSetRelAttRoll, 0, 20, (void *)this);
+	//	}
+	//	return true;
+
+	//// Target relative keys
+	//case OAPI_KEY_T:
+	//	if (RefMode == TARGET_RELATIVE) {
+	//		oapiOpenInputBox("Select Target", cbSelectTarget, 0, 20, (void *)this);
+	//	}
+	//	return true;
+	//case OAPI_KEY_N:
+	//	if (RefMode == TARGET_RELATIVE) {
+	//		SelectNextTarget();
+	//	}
+	//	return true;
+	//case OAPI_KEY_SPACE:
+	//	if (RefMode == TARGET_RELATIVE) {
+	//		SelectClosestTarget();
+	//	}
+	//	return true;
+	//case OAPI_KEY_B:
+	//	if (RefMode == TARGET_RELATIVE) {
+	//		SelectBase();
+	//	}
+	//	return true;
+
+	//case OAPI_KEY_H:
+	//	ToggleAttHoldMode();
+	//	return true;
+	//case OAPI_KEY_C:
+	//	ToggleColorMode();
+	//	return true;
+	//case OAPI_KEY_PERIOD:
+	//	if (RefMode == USER_ATT) {
+	//		SetRefAttitude();
+	//	}
+	//	return true;
+
+	//// Trim functions
+	//case OAPI_KEY_NUMPAD5:
+	//	SetTrimMode(T_ALL);
+	//	return true;
+	//case OAPI_KEY_NUMPAD1:
+	//	SetTrimMode(T_VERT);
+	//	return true;
+	//case OAPI_KEY_NUMPAD2:
+	//	SetTrimMode(T_LAT);
+	//	return true;
+	//case OAPI_KEY_NUMPAD3:
+	//	SetTrimMode(T_FA);
+	//	return true;
+	//case OAPI_KEY_NUMPAD7:
+	//	SetTrimMode(T_VERT_LAT);
+	//	return true;
+	//case OAPI_KEY_NUMPAD8:
+	//	SetTrimMode(T_LAT_FA);
+	//	return true;
+	//case OAPI_KEY_NUMPAD9:
+	//	SetTrimMode(T_VERT_FA);
+	//	return true;
+
+	//default:
+	//	return false;
+	//}
+
+}
+
+bool AttitudeMFD::IsModeChangeKey(DWORD key) const
+{
+	// The M key only needs to be used as a backup, when the SHIFT + number
+	// is in use by a vessel, such as the shuttle's RMS
+	if (key == OAPI_KEY_M || 
+		key == OAPI_KEY_1 ||
+		key == OAPI_KEY_2 || 
+		key == OAPI_KEY_3 || 
+		key == OAPI_KEY_4)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool AttitudeMFD::IsAttitudeHoldToggleKey(DWORD key) const
+{
+	return (key == OAPI_KEY_H);
+}
+
+bool AttitudeMFD::ProcessModeChangeKey(DWORD key)
+{
 	bool cbSetMode(void *id, char *str, void *data);
-	bool cbSetRelAttPitch(void *id, char *str, void *data);
-	bool cbSetRelAttYaw(void *id, char *str, void *data);
-	bool cbSetRelAttRoll(void *id, char *str, void *data);
 
 	switch(key) {
-	// Mode keys - the M key only needs to be used as a backup, when the SHIFT + number
-	// is in use by a vessel, such as the shuttle's RMS
 	case OAPI_KEY_M:
 		oapiOpenInputBox("Select Mode", cbSetMode, 0, 20, (void *)this);
 	case OAPI_KEY_1:
 		ChangeRefMode(USER_ATT);
-		return true;
 	case OAPI_KEY_2:
 		ChangeRefMode(VELOCITY);
-		return true;
 	case OAPI_KEY_3:
 		ChangeRefMode(TARGET_RELATIVE);
-		return true;
 	case OAPI_KEY_4:
 		ChangeRefMode(EI);
-		return true;
-
-	case OAPI_KEY_P:
-		if (RefMode != TARGET_RELATIVE) {
-			oapiOpenInputBox("Select Pitch", cbSetRelAttPitch, 0, 20, (void *)this);
-		} else {
-			SelectPrevTarget();
-		}
-		return true;
-	case OAPI_KEY_Y:
-		if (RefMode != TARGET_RELATIVE) {
-			oapiOpenInputBox("Select Yaw", cbSetRelAttYaw, 0, 20, (void *)this);
-		}
-		return true;
-	case OAPI_KEY_R:
-		if (RefMode != TARGET_RELATIVE) {
-			oapiOpenInputBox("Select Roll", cbSetRelAttRoll, 0, 20, (void *)this);
-		}
-		return true;
-
-	// Target relative keys
-	case OAPI_KEY_T:
-		if (RefMode == TARGET_RELATIVE) {
-			oapiOpenInputBox("Select Target", cbSelectTarget, 0, 20, (void *)this);
-		}
-		return true;
-	case OAPI_KEY_N:
-		if (RefMode == TARGET_RELATIVE) {
-			SelectNextTarget();
-		}
-		return true;
-	case OAPI_KEY_SPACE:
-		if (RefMode == TARGET_RELATIVE) {
-			SelectClosestTarget();
-		}
-		return true;
-	case OAPI_KEY_B:
-		if (RefMode == TARGET_RELATIVE) {
-			SelectBase();
-		}
-		return true;
-
-	case OAPI_KEY_H:
-		ToggleAttHoldMode();
-		return true;
-	case OAPI_KEY_C:
-		ToggleColorMode();
-		return true;
-	case OAPI_KEY_PERIOD:
-		if (RefMode == USER_ATT) {
-			SetRefAttitude();
-		}
-		return true;
-
-	// Trim functions
-	case OAPI_KEY_NUMPAD5:
-		SetTrimMode(T_ALL);
-		return true;
-	case OAPI_KEY_NUMPAD1:
-		SetTrimMode(T_VERT);
-		return true;
-	case OAPI_KEY_NUMPAD2:
-		SetTrimMode(T_LAT);
-		return true;
-	case OAPI_KEY_NUMPAD3:
-		SetTrimMode(T_FA);
-		return true;
-	case OAPI_KEY_NUMPAD7:
-		SetTrimMode(T_VERT_LAT);
-		return true;
-	case OAPI_KEY_NUMPAD8:
-		SetTrimMode(T_LAT_FA);
-		return true;
-	case OAPI_KEY_NUMPAD9:
-		SetTrimMode(T_VERT_FA);
-		return true;
-
 	default:
-		return false;
+		throw std::runtime_error("We got a key which is not a valid mode change");
 	}
 
+	return true;
 }
 
 int AttitudeMFD::ButtonMenu (const MFDBUTTONMENU **menu) const
