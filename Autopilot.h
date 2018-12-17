@@ -27,6 +27,8 @@ private:
 	double GetThusterTorque(THGROUP_TYPE thrusterGroup, int thrusterIndex) const;
 
 	bool IsWithinDeadband(double value, double deadBand) const;
-	bool IsRotationRateZero(double rotationRate) double;
-	double GetTargetRotationRate(double deltaAngle)const ;
+	bool IsRotationRateZero(double rotationRate) const;
+	void ShutdownRotationThrusters(AXIS axis);
+	double GetTargetRotationRate(double deltaAngle)const;
+	THGROUP_TYPE GetThrusterGroupForRotation(AXIS axis, double rotationRate) const;
 };

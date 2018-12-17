@@ -22,7 +22,6 @@ class IAutopilot
 	virtual bool SetAttitude(
 		double targetAttitude,
 		double currentAttitude,
-		double targetRotationRate,
 		AXIS axis,
 		DEADBAND deadBand,
 		double deltaTime) = 0;
