@@ -25,7 +25,14 @@ Autopilot::~Autopilot()
 
 void Autopilot::InitializeMaxTorque()
 {
-
+	m_maxTorque[PITCH] = GetThrusterGroupMaxTorque(THGROUP_ATT_PITCHUP);// + 
+							//GetThrusterGroupMaxTorque(THGROUP_ATT_PITCHDOWN);
+	
+	m_maxTorque[YAW] = GetThrusterGroupMaxTorque(THGROUP_ATT_YAWLEFT);// + 
+							//GetThrusterGroupMaxTorque(THGROUP_ATT_YAWRIGHT);
+	
+	m_maxTorque[ROLL] = GetThrusterGroupMaxTorque(THGROUP_ATT_BANKLEFT);// + 
+							//GetThrusterGroupMaxTorque(THGROUP_ATT_BANKRIGHT);
 }
 
 double Autopilot::GetThrusterGroupMaxTorque(THGROUP_TYPE thrusterGroup) const
@@ -59,103 +66,53 @@ bool Autopilot::SetAttitude(
 		DEADBAND deadBand,
 		double deltaTime)
 {
-	double targetRotationRate = 0.0;			
-	double rotationRateDeadband = 0.0;	
-
-	double deltaRate = 0.0;		
 	double deltaAngle = targetAttitude - currentAttitude;
-
-	VESSELSTATUS status;
-	m_spacecraft->GetStatus(status);
-	double currentRotationRate = status.vrot.data[axis];
 
 	// Let's take care of the good case first :-)
 	if (IsWithinDeadband(deltaAngle, deadBand))
 	{
-		if (IsRotationRateZero(currentRotationRate))
-		{
-			ShutdownRotationThrusters(axis);
-			return true;
-		} 
-	
-		return (NullRotationRate(axis));
+		return NullRotationRate(axis, deltaTime);
 	}
+	else
+	{
+		double targetRotationRate = GetTargetRotationRate(deltaAngle);
 
-	targetRotationRate = GetTargetRotationRate(deltaAngle);
-
-	rotationRateDeadband = min(targetRotationRate / 2, Radians(0.01/*2*/));
-	
-	if (deltaAngle < 0 ) {
-		targetRotationRate = -targetRotationRate;
-		rotationRateDeadband = -rotationRateDeadband;
+		return SetRotationRate(axis, targetRotationRate, deltaTime);
 	}
+}
 
+bool Autopilot::SetRotationRate(AXIS axis, double targetRotationRate, double deltaTime)
+{
+	VESSELSTATUS status;
+	m_spacecraft->GetStatus(status);
+	double currentRotationRate = status.vrot.data[axis];
 	double deltaRotationRate = targetRotationRate - currentRotationRate;
+	double rotationRateDeadband = min(targetRotationRate / 2, Radians(0.01/*2*/));
 
 	double mass = m_spacecraft->GetMass();
-	double torque = (mass * m_principleMomentOfInertia.data[axis] * deltaRate) / deltaTime;
+	double torque = (mass * m_principleMomentOfInertia.data[axis] * fabs(deltaRotationRate)) / deltaTime;
 	double thusterLevel = min(torque / m_maxTorque[axis], 1);
-	THGROUP_TYPE thrusterGroup = GetThrusterGroupForRotation(axis, deltaRate);
+	THGROUP_TYPE thrusterGroup = GetThrusterGroupForRotation(axis, deltaRotationRate);
 
-	if (IsWithinDeadband(deltaRate, rotationRateDeadband))
+	if (IsWithinDeadband(deltaRotationRate, rotationRateDeadband))
 	{
 		ShutdownRotationThrusters(axis);
+		return true;
 	}
 	else
 	{
 		m_spacecraft->SetThrusterGroupLevel(thrusterGroup, thusterLevel);
 	}
 
-	/*if (DeltaAngle > 0) {
-		if (DeltaRate > rotationRateDeadband) {
-			Thrust = (Mass * PMI.data[axis] * DeltaRate) / deltaTime;
-			Level = min((Thrust/MaxThrust), 1);
-			m_spacecraft->SetAttitudeRotLevel(axis, Level);
-		} else if (DeltaRate < -rotationRateDeadband) { 
-			Thrust = (Mass * PMI.data[axis] * DeltaRate) / deltaTime;
-			Level = max((Thrust/MaxThrust), -1);
-			m_spacecraft->SetAttitudeRotLevel(axis, Level);
-		} else {
-			ShutdownRotationThrusters(axis);
-		}
-	} else {
-		if (DeltaRate < rotationRateDeadband) {
-			Thrust = (Mass * PMI.data[axis] * DeltaRate) / deltaTime;
-			Level = max((Thrust/MaxThrust), -1);
-			m_spacecraft->SetAttitudeRotLevel(axis, Level);
-		} else if (DeltaRate > -rotationRateDeadband) { 
-			Thrust = (Mass * PMI.data[axis] * DeltaRate) / deltaTime;
-			Level = min((Thrust/MaxThrust), 1);
-			m_spacecraft->SetAttitudeRotLevel(axis, Level);
-		} else {
-			ShutdownRotationThrusters(axis);
-		}
-	}*/
 	return false;
 }
 
-bool Autopilot::NullRotationRate(AXIS axis)
+bool Autopilot::NullRotationRate(AXIS axis, double deltaTime)
 {
 	VESSELSTATUS status;
 	m_spacecraft->GetStatus(status);
 
-	double rotationRate = status.vrot.data[axis];
-
-	if (IsRotationRateZero(rotationRate)) {
-		ShutdownRotationThrusters(axis);
-		return true;
-	}
-
-	double RateDeadband = Radians(0.001), Thrust, Level,
-			Mass = m_spacecraft->GetMass(),
-			MaxThrust = m_spacecraft->GetMaxThrust(ENGINE_ATTITUDE),
-			Size = m_spacecraft->GetSize();
-
-	Thrust = -(Mass * m_principleMomentOfInertia.data[axis] * rotationRate) / (Size);	
-	Level = min((Thrust/MaxThrust), 1);
-	m_spacecraft->SetAttitudeRotLevel(axis, Level);
-
-	return false;
+	return SetRotationRate(axis, 0.0, deltaTime);
 }
 
 bool Autopilot::IsWithinDeadband(double value, double deadBand) const
@@ -191,25 +148,36 @@ void Autopilot::ShutdownRotationThrusters(AXIS axis)
 
 double Autopilot::GetTargetRotationRate(double deltaAngle) const 
 {
+	double rotationRateMagnitude = 0.0;
+
 	if (fabs(deltaAngle) < DEADBAND_LOW)
 	{
-		return RATE_FINE;
+		rotationRateMagnitude = RATE_FINE;
 	} 
 	else if (fabs(deltaAngle) < DEADBAND_MID)
 	{
-		return RATE_LOW;
+		rotationRateMagnitude = RATE_LOW;
 	} 
 	else if (fabs(deltaAngle) < DEADBAND_HIGH)
 	{
-		return RATE_MID;
+		rotationRateMagnitude = RATE_MID;
 	} 
 	else if (fabs(deltaAngle) < DEADBAND_MAX)
 	{
-		return RATE_HIGH;
+		rotationRateMagnitude = RATE_HIGH;
 	} 
 	else
 	{
-		return RATE_MAX;
+		rotationRateMagnitude = RATE_MAX;
+	}
+
+	if (deltaAngle >= 0)
+	{
+		return rotationRateMagnitude;
+	}
+	else
+	{
+		return -rotationRateMagnitude;
 	}
 }
 
@@ -222,7 +190,7 @@ THGROUP_TYPE Autopilot::GetThrusterGroupForRotation(AXIS axis, double rotationRa
 	case PITCH:
 		return isPositiveRate ? THGROUP_ATT_PITCHUP : THGROUP_ATT_PITCHDOWN;
 	case YAW:
-		return isPositiveRate ? THGROUP_ATT_YAWRIGHT : THGROUP_ATT_YAWLEFT;
+		return isPositiveRate ? THGROUP_ATT_YAWLEFT : THGROUP_ATT_YAWRIGHT;
 	case ROLL:
 		return isPositiveRate ? THGROUP_ATT_BANKRIGHT : THGROUP_ATT_BANKLEFT;
 	default:

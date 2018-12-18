@@ -2,6 +2,7 @@
 #include "OrbiterSDK.h"
 #include "CDK.h"
 #include "Display.h"
+#include "Autopilot.h"
 
 typedef struct {
 	VECTOR3 Pitch;
@@ -16,12 +17,18 @@ UserAttitudeModeController::UserAttitudeModeController(
 	: m_spacecraft(spacecraft)
 	, m_displayWidth(displayWidth)
 	, m_displayHeight(displayHeight)
+	, m_globalSpacecraftPosition(NULL_VECTOR)
+	, m_pitchYawRollAngles(NULL_VECTOR)
+	, m_referenceAttitude(NULL_VECTOR)
+	, m_relativeAttitude(NULL_VECTOR)
 	, m_isAutopilotEngaged(false)
 {
+	m_autopilot = new Autopilot(spacecraft);
 }
 
 UserAttitudeModeController::~UserAttitudeModeController()
 {
+	delete m_autopilot;
 }
 
 void UserAttitudeModeController::Start()
@@ -63,9 +70,9 @@ bool UserAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 		DEG * m_status.arot.z );
 	display->IncrementCurrentLine();
 
-	display->PrintAngle("Set Pitch", m_referenceAttitude.data[PITCH]);
-	display->PrintAngle("Set Yaw ", m_referenceAttitude.data[YAW]);
-	display->PrintAngle("Set Roll", m_referenceAttitude.data[ROLL]);
+	display->PrintAngle("Set Pitch", m_relativeAttitude.data[PITCH]);
+	display->PrintAngle("Set Yaw ", m_relativeAttitude.data[YAW]);
+	display->PrintAngle("Set Roll", m_relativeAttitude.data[ROLL]);
 
 	display->IncrementCurrentLine();
 	display->IncrementCurrentLine();
@@ -102,9 +109,9 @@ void UserAttitudeModeController::Control()
 {
 	if (m_isAutopilotEngaged)
 	{
-		SetAttitude(0, m_pitchYawRollAngles.data[PITCH], PITCH, DB_FINE);
-		SetAttitude(0, m_pitchYawRollAngles.data[YAW], YAW, DB_FINE);
-		SetAttitude(0, m_pitchYawRollAngles.data[ROLL], ROLL, DB_FINE);
+		m_autopilot->SetAttitude(0, m_pitchYawRollAngles.data[PITCH], PITCH, DB_FINE, 1.0);
+		m_autopilot->SetAttitude(0, m_pitchYawRollAngles.data[YAW], YAW, DB_FINE, 1.0);
+		m_autopilot->SetAttitude(0, m_pitchYawRollAngles.data[ROLL], ROLL, DB_FINE, 1.0);
 	}
 }
 
@@ -131,7 +138,10 @@ int UserAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** buttonMenu) 
 		{"Set Reference", "Attitude", '.'},
 	};
 
-	*buttonMenu = s_buttonMenu;
+	if (*buttonMenu != NULL)
+	{
+		*buttonMenu = s_buttonMenu;
+	}
 
 	return (sizeof(s_buttonMenu)/sizeof(s_buttonMenu[0]));
 }

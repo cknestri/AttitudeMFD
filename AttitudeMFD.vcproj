@@ -195,18 +195,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\CDK\Control.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="c:\"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\Diaplay.cpp"
 				>
 			</File>
@@ -254,10 +242,6 @@
 			</File>
 			<File
 				RelativePath=".\CDK\CDK.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CDK\Control.h"
 				>
 			</File>
 			<File

@@ -5,13 +5,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "Control.h"
 #include "Elements.h"
 #include "GravBodyData.h"
 #include "OrbiterMath.h"
 #include "Prediction.h"
 #include "EI.h"
 #include "Orbitersdk.h"
+
+enum AXIS
+{
+	PITCH,
+	YAW,
+	ROLL
+};
 
 // Prototypes for general functions
 //void ScaleOutput(char *Buffer, double Value);

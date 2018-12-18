@@ -150,10 +150,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Control.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\EI.cpp"
 				>
 			</File>
@@ -177,10 +173,6 @@
 			>
 			<File
 				RelativePath=".\CDK.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Control.h"
 				>
 			</File>
 			<File

@@ -12,6 +12,7 @@
 #define GRAV_BODY_DATA_H
 
 #include "Orbitersdk.h"
+#include "orbitermath.h"
 
 // All the gravitational bodies - GRAVBODY_UNKNOWN must always be last, so NUM_GRAV_BODIES (below)
 // is correct

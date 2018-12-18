@@ -96,13 +96,6 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	// State that doesn't change, so we'll only get it once
 	Spacecraft = oapiGetFocusInterface();
 
-	// This function is now obsolete, but since we're not provided
-	// any of way of getting this, I'm going to use it
-	MaxAttThrust = Spacecraft->GetMaxThrust(ENGINE_ATTITUDE);
-	MaxMainThrust = Spacecraft->GetMaxThrust(ENGINE_MAIN);
-	MaxRetroThrust = Spacecraft->GetMaxThrust(ENGINE_RETRO);
-	MaxHoverThrust = Spacecraft->GetMaxThrust(ENGINE_HOVER);
-
 	m_attitudeModeController = GetAttitudeModeController(RefMode, Spacecraft, w, h);
 
 	// Let's prime the pump :-)  We'll just lie about the time
@@ -512,10 +505,10 @@ void inline AttitudeMFD::SetTrimLevelVert()
 	// it's better to use one of the engines
 	if (HaveHoverEngine() && Level > 3.0) {
 			Level = -(Mass * RelVel.data[TA_VERT]) / MaxHoverThrust;
-			NormalizeThrustLevel(Level);
+			// NormalizeThrustLevel(Level);
 			Spacecraft->SetEngineLevel(ENGINE_HOVER, Level);
 	} else {
-		NormalizeThrustLevel(Level);
+		// NormalizeThrustLevel(Level);
 		Spacecraft->SetAttitudeLinLevel((int)TA_VERT, Level);
 	}
 
@@ -529,7 +522,7 @@ void inline AttitudeMFD::SetTrimLevelLat()
 	// be using the linear thruster
 	Level = -(Mass * RelVel.data[TA_LAT]) / MaxAttThrust;
 	
-	NormalizeThrustLevel(Level);
+	// NormalizeThrustLevel(Level);
 	Spacecraft->SetAttitudeLinLevel((int)TA_LAT, Level);
 	
 }
@@ -545,14 +538,14 @@ void inline AttitudeMFD::SetTrimLevelFA()
 
 	if (HaveMainEngine() && Level > 3.0) {
 		Level = -(Mass * RelVel.data[TA_FA]) / MaxMainThrust;
-		NormalizeThrustLevel(Level);
+		// NormalizeThrustLevel(Level);
 		Spacecraft->SetEngineLevel(ENGINE_MAIN, Level);
 	} else if (HaveRetroEngine() &&Level < -3.0) {
 		Level = (Mass * RelVel.data[TA_FA]) / MaxRetroThrust;
-		NormalizeThrustLevel(Level);
+		// NormalizeThrustLevel(Level);
 		Spacecraft->SetEngineLevel(ENGINE_RETRO, Level);
 	} else {
-		NormalizeThrustLevel(Level);
+		// NormalizeThrustLevel(Level);
 		Spacecraft->SetAttitudeLinLevel((int)TA_FA, Level);
 	}
 }

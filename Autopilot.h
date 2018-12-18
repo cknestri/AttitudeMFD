@@ -15,8 +15,6 @@ public:
 		DEADBAND deadBand,
 		double deltaTime) override;
 
-	bool NullRotationRate(AXIS axis) override;
-
 private:
 	VESSEL* m_spacecraft;
 	VECTOR3 m_principleMomentOfInertia;
@@ -25,6 +23,9 @@ private:
 	void InitializeMaxTorque();
 	double GetThrusterGroupMaxTorque(THGROUP_TYPE thrusterGroup) const;
 	double GetThusterTorque(THGROUP_TYPE thrusterGroup, int thrusterIndex) const;
+
+	bool SetRotationRate(AXIS axis, double targetRotationRate, double deltaTime);
+	bool NullRotationRate(AXIS axis, double deltaTime);
 
 	bool IsWithinDeadband(double value, double deadBand) const;
 	bool IsRotationRateZero(double rotationRate) const;

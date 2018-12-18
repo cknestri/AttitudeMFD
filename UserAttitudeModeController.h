@@ -2,6 +2,7 @@
 
 #include "IAttitudeModeController.h"
 #include "CDK.h"
+#include "IAutopilot.h"
 
 typedef VECTOR3 Attitude;
 
@@ -31,7 +32,9 @@ private:
 	VECTOR3 m_globalSpacecraftPosition;
 	VECTOR3 m_pitchYawRollAngles;
 	Attitude m_referenceAttitude;
+	Attitude m_relativeAttitude;
 	bool m_isAutopilotEngaged;
+	IAutopilot* m_autopilot;
 
 	void CalculateAttitude();
 	void SetReferenceAttitude();

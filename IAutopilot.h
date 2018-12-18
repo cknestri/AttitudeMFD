@@ -1,12 +1,6 @@
 #pragma once
+#include "CDK.h"
 #include "orbitermath.h"
-
-enum AXIS
-{
-	PITCH,
-	YAW,
-	ROLL
-};
 
 // The deadband for attitude adjustments.  These are just the "standard" deadband limits - a user
 // can pass any deadband value to SetAttitude().  For example, a 5 degree deadband: 
@@ -19,12 +13,11 @@ const DEADBAND DB_FINE = Radians(0.1),
 
 class IAutopilot
 {
+public:
 	virtual bool SetAttitude(
 		double targetAttitude,
 		double currentAttitude,
 		AXIS axis,
 		DEADBAND deadBand,
 		double deltaTime) = 0;
-
-	virtual bool NullRotationRate(AXIS axis) = 0;
 };
