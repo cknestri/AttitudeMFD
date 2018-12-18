@@ -207,6 +207,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\EntryInterfaceAttitudeModeController.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CDK\OrbiterMath.cpp"
 				>
 			</File>
@@ -219,7 +223,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TargetRelativeAttitudeModeController.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\UserAttitudeModeController.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\VelocityAttitudeModeController.cpp"
 				>
 			</File>
 		</Filter>
@@ -257,6 +269,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\EntryInterfaceAttitudeModeController.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CDK\GravBodyData.h"
 				>
 			</File>
@@ -289,7 +305,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TargetRelativeAttitudeModeController.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UserAttitudeModeController.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VelocityAttitudeModeController.h"
 				>
 			</File>
 		</Filter>
