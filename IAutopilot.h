@@ -15,9 +15,17 @@ class IAutopilot
 {
 public:
 	virtual bool SetAttitude(
+		const VECTOR3& targetAttitude,
+		const VECTOR3& currentAttitude,
+		DEADBAND deadBand,
+		double deltaTime) = 0;
+
+	virtual bool SetAttitudeInAxis(
 		double targetAttitude,
 		double currentAttitude,
 		AXIS axis,
 		DEADBAND deadBand,
 		double deltaTime) = 0;
+
+	virtual void Disable() = 0;
 };

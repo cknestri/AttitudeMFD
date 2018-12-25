@@ -103,15 +103,14 @@ void UserAttitudeModeController::EnableAutopilot()
 void UserAttitudeModeController::DisableAutopilot()
 {
 	m_isAutopilotEngaged = false;
+	m_autopilot->Disable();
 }
 
 void UserAttitudeModeController::Control()
 {
 	if (m_isAutopilotEngaged)
 	{
-		m_autopilot->SetAttitude(0, m_pitchYawRollAngles.data[PITCH], PITCH, DB_FINE, 1.0);
-		m_autopilot->SetAttitude(0, m_pitchYawRollAngles.data[YAW], YAW, DB_FINE, 1.0);
-		m_autopilot->SetAttitude(0, m_pitchYawRollAngles.data[ROLL], ROLL, DB_FINE, 1.0);
+		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawRollAngles, DB_FINE, 1.0);
 	}
 }
 

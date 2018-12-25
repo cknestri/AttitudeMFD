@@ -310,24 +310,9 @@ void inline AttitudeMFD::UpdateState(double TimeStep)
 	SlipAngle = Spacecraft->GetSlipAngle();
 	Mass = Spacecraft->GetMass();
 
-	switch (RefMode) {
-	case USER_ATT:
-		m_attitudeModeController->UpdateState();
-		CalcAttitude();	
-		break;
-	case VELOCITY:
-		CalcVelocity();
-		break;
-	case TARGET_RELATIVE:
-		CalcTargetRelative();
-		break;
-	case EI:
-		CalcEI();
-		break;
-	};
+	m_attitudeModeController->UpdateState();
 
 	Control();
-
 
 	// Reset time
 	TimeElapsed = 0.0;
@@ -471,8 +456,7 @@ void inline AttitudeMFD::CalcEI()
 }
 
 
-
-void inline AttitudeMFD::Control()
+void AttitudeMFD::Control()
 {
 	m_attitudeModeController->Control();
 	
@@ -799,23 +783,7 @@ void AttitudeMFD::ChangeRefMode(REF_MODE Mode)
 
 	delete m_attitudeModeController;
 	m_attitudeModeController = GetAttitudeModeController(RefMode, Spacecraft, Width, Height);
-
-	switch (Mode) {
-	case USER_ATT:
-		m_attitudeModeController->Start();
-		StartModeAttitude();
-		break;
-	case TARGET_RELATIVE:
-		StartModeTargetRelative();
-		break;
-	case VELOCITY:
-		StartModeVelocity();
-		break;
-	case EI:
-		StartModeEI();
-		break;
-	}
-
+	m_attitudeModeController->Start();
 }
 
 bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
@@ -969,12 +937,16 @@ bool AttitudeMFD::ProcessModeChangeKey(DWORD key)
 		oapiOpenInputBox("Select Mode", cbSetMode, 0, 20, (void *)this);
 	case OAPI_KEY_1:
 		ChangeRefMode(USER_ATT);
+		break;
 	case OAPI_KEY_2:
 		ChangeRefMode(VELOCITY);
+		break;
 	case OAPI_KEY_3:
 		ChangeRefMode(TARGET_RELATIVE);
+		break;
 	case OAPI_KEY_4:
 		ChangeRefMode(EI);
+		break;
 	default:
 		throw std::runtime_error("We got a key which is not a valid mode change");
 	}

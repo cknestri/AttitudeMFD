@@ -1,4 +1,5 @@
 #include "Autopilot.h"
+#include <cerrno>
 
 const double RATE_MAX = Radians(2.0);
 const double DEADBAND_MAX = Radians(10.0);
@@ -12,15 +13,59 @@ const double RATE_FINE = Radians(0.01);
 
 const double RATE_NULL = Radians(0.0001);
 
+using namespace std;
+
+struct TelemetryFrame
+{
+	VECTOR3 targetAttitude;
+	VECTOR3 currentAttitude;
+	VECTOR3 targetRotationRate;
+	VECTOR3 deltaRorationRate;
+	VECTOR3 roationRateDeadBand;
+	VECTOR3 torque;
+	VECTOR3 thrusterLevel;
+
+	void Clear()
+	{
+		memset(this, 0, sizeof(this));
+	}
+
+	void Print(ofstream& log)
+	{
+		log << targetAttitude.data[PITCH] << "," << targetAttitude.data[YAW] << "," << targetAttitude.data[ROLL] << ",";
+		log << currentAttitude.data[PITCH] << "," << currentAttitude.data[YAW] << "," << currentAttitude.data[ROLL] << ",";
+		log << targetRotationRate.data[PITCH] << "," << targetRotationRate.data[YAW] << "," << targetRotationRate.data[ROLL] << ",";
+		log << deltaRorationRate.data[PITCH] << "," << deltaRorationRate.data[YAW] << "," << deltaRorationRate.data[ROLL] << ",";
+		log << roationRateDeadBand.data[PITCH] << "," << roationRateDeadBand.data[YAW] << "," << roationRateDeadBand.data[ROLL] << ",";
+		log << torque.data[PITCH] << "," << torque.data[YAW] << "," << torque.data[ROLL] << ",";
+		log << thrusterLevel.data[PITCH] << "," << thrusterLevel.data[YAW] << "," << thrusterLevel.data[ROLL] << endl;
+	}
+};
+
+TelemetryFrame g_telemetryFrame;
+
 Autopilot::Autopilot(VESSEL* spacecraft)
 	: m_spacecraft(spacecraft)
 {
+	m_log.open("c:\\Users\\chris\\telemetry.csv");
+
+	PrintString(strerror(errno));
+
+	m_log << "Target Attitude Pitch,Target Attitude Yaw, Target Attitude Roll,";
+	m_log << "Current Attitude Pitch,Current Attitude Yaw,Current Attitude Roll,";
+	m_log << "Target Rotation Rate Pitch, Target Rotation Rate Yaw, Target Rotation Rate Roll,";
+	m_log << "Delta RotationRate Pitch,Delta RotationRate Yaw,Delta RotationRate Roll,";
+	m_log << "Rotation Rate Deadband Pitch,Rotation Rate Deadband Yaw,Rotation Rate Deadband Roll,";
+	m_log << "Torque Pitch,Torque Yaw,Torque Roll,";
+	m_log << "Thruster Level Pitch,Thruster Level Yaw,Thruster Level Roll" << endl;
+
 	m_spacecraft->GetPMI(m_principleMomentOfInertia);
 	InitializeMaxTorque();
 }
 
 Autopilot::~Autopilot()
 {
+	m_log.close();
 }
 
 void Autopilot::InitializeMaxTorque()
@@ -60,6 +105,23 @@ double Autopilot::GetThusterTorque(THGROUP_TYPE thrusterGroup, int thrusterIndex
 }
 
 bool Autopilot::SetAttitude(
+	const VECTOR3& targetAttitude,
+	const VECTOR3& currentAttitude,
+	DEADBAND deadBand,
+	double deltaTime)
+{
+	g_telemetryFrame.Clear();
+
+	auto isPitchSet = SetAttitudeInAxis(targetAttitude.data[PITCH], currentAttitude.data[PITCH], PITCH, deadBand, deltaTime);
+	auto isYawSet = SetAttitudeInAxis(targetAttitude.data[YAW], currentAttitude.data[YAW], YAW, deadBand, deltaTime);
+	auto isRollSet = SetAttitudeInAxis(targetAttitude.data[ROLL], currentAttitude.data[ROLL], ROLL, deadBand, deltaTime);
+
+	g_telemetryFrame.Print(m_log);
+
+	return (isPitchSet && isYawSet && isRollSet);
+}
+
+bool Autopilot::SetAttitudeInAxis(
 		double targetAttitude,
 		double currentAttitude,
 		AXIS axis,
@@ -68,20 +130,23 @@ bool Autopilot::SetAttitude(
 {
 	double deltaAngle = targetAttitude - currentAttitude;
 
+	g_telemetryFrame.targetAttitude.data[axis] = DEG * targetAttitude;
+	g_telemetryFrame.currentAttitude.data[axis] = DEG * currentAttitude;
+
 	// Let's take care of the good case first :-)
 	if (IsWithinDeadband(deltaAngle, deadBand))
 	{
-		return NullRotationRate(axis, deltaTime);
+		return NullRotationRateInAxis(axis, deltaTime);
 	}
 	else
 	{
 		double targetRotationRate = GetTargetRotationRate(deltaAngle);
 
-		return SetRotationRate(axis, targetRotationRate, deltaTime);
+		return SetRotationRateInAxis(axis, targetRotationRate, deltaTime);
 	}
 }
 
-bool Autopilot::SetRotationRate(AXIS axis, double targetRotationRate, double deltaTime)
+bool Autopilot::SetRotationRateInAxis(AXIS axis, double targetRotationRate, double deltaTime)
 {
 	VESSELSTATUS status;
 	m_spacecraft->GetStatus(status);
@@ -89,35 +154,58 @@ bool Autopilot::SetRotationRate(AXIS axis, double targetRotationRate, double del
 	double deltaRotationRate = targetRotationRate - currentRotationRate;
 	double rotationRateDeadband = min(targetRotationRate / 2, Radians(0.01/*2*/));
 
-	double mass = m_spacecraft->GetMass();
-	double torque = (mass * m_principleMomentOfInertia.data[axis] * fabs(deltaRotationRate)) / deltaTime;
-	double thusterLevel = min(torque / m_maxTorque[axis], 1);
-	THGROUP_TYPE thrusterGroup = GetThrusterGroupForRotation(axis, deltaRotationRate);
+	g_telemetryFrame.targetRotationRate.data[axis] = DEG * targetRotationRate;
+	g_telemetryFrame.deltaRorationRate.data[axis] = DEG * deltaRotationRate;
+	g_telemetryFrame.roationRateDeadBand.data[axis] = DEG * rotationRateDeadband;
 
 	if (IsWithinDeadband(deltaRotationRate, rotationRateDeadband))
 	{
-		ShutdownRotationThrusters(axis);
+		ShutdownRotationThrustersInAxis(axis);
 		return true;
 	}
 	else
 	{
+		double mass = m_spacecraft->GetMass();
+		double torque = (mass * m_principleMomentOfInertia.data[axis] * fabs(deltaRotationRate)) / deltaTime;
+		double thusterLevel = min(torque / m_maxTorque[axis], 1);
+		THGROUP_TYPE thrusterGroup = GetThrusterGroupForRotationInAxis(axis, deltaRotationRate);
+
+		g_telemetryFrame.torque.data[axis] = torque;
+		g_telemetryFrame.thrusterLevel.data[axis] = deltaRotationRate >= 0 ? thusterLevel * 100 : -thusterLevel * 100;
+
 		m_spacecraft->SetThrusterGroupLevel(thrusterGroup, thusterLevel);
 	}
 
 	return false;
 }
 
-bool Autopilot::NullRotationRate(AXIS axis, double deltaTime)
+void Autopilot::Disable()
 {
-	VESSELSTATUS status;
-	m_spacecraft->GetStatus(status);
+	ShutdownRotationThrustersInAxis(PITCH);
+	ShutdownRotationThrustersInAxis(YAW);
+	ShutdownRotationThrustersInAxis(ROLL);
 
-	return SetRotationRate(axis, 0.0, deltaTime);
+}
+
+bool Autopilot::NullRotationRateInAxis(AXIS axis, double deltaTime)
+{
+	return SetRotationRateInAxis(axis, 0, deltaTime);
 }
 
 bool Autopilot::IsWithinDeadband(double value, double deadBand) const
 {
-	return (fabs(value) < deadBand);
+	if (value > 0 && deadBand < 0)
+	{
+		return false;
+	}
+	else if (value < 0 && deadBand > 0)
+	{
+		return false;
+	}
+	else
+	{
+		return (fabs(value) < fabs(deadBand));
+	}
 }
 
 bool Autopilot::IsRotationRateZero(double rotationRate) const
@@ -125,8 +213,11 @@ bool Autopilot::IsRotationRateZero(double rotationRate) const
 	return IsWithinDeadband(rotationRate, RATE_NULL);
 }
 
-void Autopilot::ShutdownRotationThrusters(AXIS axis)
+void Autopilot::ShutdownRotationThrustersInAxis(AXIS axis)
 {
+	g_telemetryFrame.torque.data[axis] = 0;
+	g_telemetryFrame.thrusterLevel.data[axis] = 0;
+
 	switch (axis)
 	{
 	case PITCH:
@@ -181,7 +272,7 @@ double Autopilot::GetTargetRotationRate(double deltaAngle) const
 	}
 }
 
-THGROUP_TYPE Autopilot::GetThrusterGroupForRotation(AXIS axis, double rotationRate) const
+THGROUP_TYPE Autopilot::GetThrusterGroupForRotationInAxis(AXIS axis, double rotationRate) const
 {
 	bool isPositiveRate = rotationRate >= 0;
 
@@ -197,3 +288,4 @@ THGROUP_TYPE Autopilot::GetThrusterGroupForRotation(AXIS axis, double rotationRa
 		throw std::runtime_error("Unexpected axis");
 	}
 }
+
