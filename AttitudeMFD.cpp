@@ -240,10 +240,6 @@ void AttitudeMFD::ToggleAttHoldMode()
 	{
 		m_attitudeModeController->DisableAutopilot();
 	}
-
-
-	// Stop all engine firings
-	Spacecraft->SetAttitudeRotLevel(NULL_VECTOR);
 }
 
 
@@ -288,6 +284,8 @@ void inline AttitudeMFD::UpdateState(double TimeStep)
 
 	RotLevel.data[ROLL] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_BANKRIGHT) - 
 							Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_BANKLEFT);
+
+	PrintAngleVector(RotLevel);
 
 	if (TimeStep < 1) {
 		InvalidateDisplay();
@@ -776,8 +774,8 @@ void AttitudeMFD::DisplayEI()
 
 void AttitudeMFD::ChangeRefMode(REF_MODE Mode)
 {	
-	Spacecraft->SetAttitudeRotLevel(NULL_VECTOR);
 	AttHoldMode = DISENGAGED;
+	m_attitudeModeController->DisableAutopilot();
 
 	RefMode = Mode;
 
