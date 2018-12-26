@@ -98,10 +98,10 @@ double Autopilot::GetThusterTorque(THGROUP_TYPE thrusterGroup, int thrusterIndex
 {
 	THRUSTER_HANDLE thruster = m_spacecraft->GetGroupThruster(thrusterGroup, thrusterIndex);
 
-	VECTOR3 thrusterPosition;
-	m_spacecraft->GetThrusterRef(thruster, thrusterPosition);
+VECTOR3 thrusterPosition;
+m_spacecraft->GetThrusterRef(thruster, thrusterPosition);
 
-	return (m_spacecraft->GetThrusterMax(thruster) * Mag(thrusterPosition));
+return (m_spacecraft->GetThrusterMax(thruster) * Mag(thrusterPosition));
 }
 
 bool Autopilot::SetAttitude(
@@ -122,11 +122,11 @@ bool Autopilot::SetAttitude(
 }
 
 bool Autopilot::SetAttitudeInAxis(
-		double targetAttitude,
-		double currentAttitude,
-		AXIS axis,
-		DEADBAND deadBand,
-		double deltaTime)
+	double targetAttitude,
+	double currentAttitude,
+	AXIS axis,
+	DEADBAND deadBand,
+	double deltaTime)
 {
 	double deltaAngle = targetAttitude - currentAttitude;
 
@@ -134,7 +134,7 @@ bool Autopilot::SetAttitudeInAxis(
 	g_telemetryFrame.currentAttitude.data[axis] = DEG * currentAttitude;
 
 	// Let's take care of the good case first :-)
-	if (IsWithinDeadband(deltaAngle, deadBand))
+	if (IsDeltaValueWithinDeadband(deltaAngle, deadBand))
 	{
 		return NullRotationRateInAxis(axis, deltaTime);
 	}
@@ -152,13 +152,13 @@ bool Autopilot::SetRotationRateInAxis(AXIS axis, double targetRotationRate, doub
 	m_spacecraft->GetStatus(status);
 	double currentRotationRate = status.vrot.data[axis];
 	double deltaRotationRate = targetRotationRate - currentRotationRate;
-	double rotationRateDeadband = min(targetRotationRate / 2, Radians(0.01/*2*/));
+	double rotationRateDeadband = GetRotationRateDeadband(targetRotationRate);
 
 	g_telemetryFrame.targetRotationRate.data[axis] = DEG * targetRotationRate;
 	g_telemetryFrame.deltaRorationRate.data[axis] = DEG * deltaRotationRate;
 	g_telemetryFrame.roationRateDeadBand.data[axis] = DEG * rotationRateDeadband;
 
-	if (IsWithinDeadband(deltaRotationRate, rotationRateDeadband))
+	if (IsDeltaValueWithinDeadband(deltaRotationRate, rotationRateDeadband))
 	{
 		ShutdownRotationThrustersInAxis(axis);
 		return true;
@@ -192,25 +192,19 @@ bool Autopilot::NullRotationRateInAxis(AXIS axis, double deltaTime)
 	return SetRotationRateInAxis(axis, 0, deltaTime);
 }
 
-bool Autopilot::IsWithinDeadband(double value, double deadBand) const
+bool Autopilot::IsDeltaValueWithinDeadband(double deltaValue, double deadband) const
 {
-	if (value > 0 && deadBand < 0)
-	{
-		return false;
-	}
-	else if (value < 0 && deadBand > 0)
-	{
-		return false;
-	}
-	else
-	{
-		return (fabs(value) < fabs(deadBand));
-	}
+	return (fabs(deltaValue) <= fabs(deadband));
+}
+
+double Autopilot::GetRotationRateDeadband(double targetRotationRate) const
+{
+	return min(fabs(targetRotationRate) / 2, Radians(0.01/*2*/));
 }
 
 bool Autopilot::IsRotationRateZero(double rotationRate) const
 {
-	return IsWithinDeadband(rotationRate, RATE_NULL);
+	return IsDeltaValueWithinDeadband(rotationRate, RATE_NULL);
 }
 
 void Autopilot::ShutdownRotationThrustersInAxis(AXIS axis)

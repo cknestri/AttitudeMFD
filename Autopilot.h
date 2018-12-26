@@ -38,8 +38,9 @@ private:
 	bool SetRotationRateInAxis(AXIS axis, double targetRotationRate, double deltaTime);
 	bool NullRotationRateInAxis(AXIS axis, double deltaTime);
 
-	bool IsWithinDeadband(double value, double deadBand) const;
+	bool IsDeltaValueWithinDeadband(double deltaValue, double deadband) const;
 	bool IsRotationRateZero(double rotationRate) const;
+	double GetRotationRateDeadband(double targetRotationRate) const;
 	void ShutdownRotationThrustersInAxis(AXIS axis);
 	double GetTargetRotationRate(double deltaAngle) const;
 	THGROUP_TYPE GetThrusterGroupForRotationInAxis(AXIS axis, double rotationRate) const;
