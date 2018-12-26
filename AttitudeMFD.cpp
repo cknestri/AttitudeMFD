@@ -94,7 +94,7 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	AttHoldMode = DISENGAGED;
 	
 	// State that doesn't change, so we'll only get it once
-	Spacecraft = oapiGetFocusInterface();
+	Spacecraft = vessel;
 
 	m_attitudeModeController = GetAttitudeModeController(RefMode, Spacecraft, w, h);
 
@@ -285,8 +285,6 @@ void inline AttitudeMFD::UpdateState(double TimeStep)
 	RotLevel.data[ROLL] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_BANKRIGHT) - 
 							Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_BANKLEFT);
 
-	PrintAngleVector(RotLevel);
-
 	if (TimeStep < 1) {
 		InvalidateDisplay();
 	}
@@ -315,6 +313,12 @@ void inline AttitudeMFD::UpdateState(double TimeStep)
 	// Reset time
 	TimeElapsed = 0.0;
 
+	VECTOR3 thrustGroupLevel;
+	thrustGroupLevel.data[PITCH] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_PITCHUP);
+	thrustGroupLevel.data[YAW] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_PITCHDOWN);
+	thrustGroupLevel.data[ROLL] = 0;
+
+	PrintAngleVector(thrustGroupLevel);
 }
 
 VECTOR3 GetPYR(VECTOR3 Pitch, VECTOR3 YawRoll)

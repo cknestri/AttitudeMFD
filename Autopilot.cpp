@@ -1,5 +1,4 @@
 #include "Autopilot.h"
-#include <cerrno>
 
 const double RATE_MAX = Radians(2.0);
 const double DEADBAND_MAX = Radians(10.0);
@@ -48,8 +47,6 @@ Autopilot::Autopilot(VESSEL* spacecraft)
 	: m_spacecraft(spacecraft)
 {
 	m_log.open("c:\\Users\\chris\\telemetry.csv");
-
-	PrintString(strerror(errno));
 
 	m_log << "Target Attitude Pitch,Target Attitude Yaw, Target Attitude Roll,";
 	m_log << "Current Attitude Pitch,Current Attitude Yaw,Current Attitude Roll,";
@@ -158,9 +155,11 @@ bool Autopilot::SetRotationRateInAxis(AXIS axis, double targetRotationRate, doub
 	g_telemetryFrame.deltaRorationRate.data[axis] = DEG * deltaRotationRate;
 	g_telemetryFrame.roationRateDeadBand.data[axis] = DEG * rotationRateDeadband;
 
+	// Clear the thrusters.  If there are any thruster firings, they will be commanded in this function.
+	ShutdownRotationThrustersInAxis(axis);
+
 	if (IsDeltaValueWithinDeadband(deltaRotationRate, rotationRateDeadband))
 	{
-		ShutdownRotationThrustersInAxis(axis);
 		return true;
 	}
 	else
