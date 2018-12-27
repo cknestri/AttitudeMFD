@@ -12,6 +12,8 @@
 #include "List.h"
 #include "CDK.h"
 #include "IAttitudeModeController.h"
+#include <functional>
+#include <map>
 
 typedef struct {
 	VECTOR3 Pitch;
@@ -68,6 +70,8 @@ public:
 private:
 	IAttitudeModeController* m_attitudeModeController;
 
+	std::map<DWORD, std::function<void()>> m_commandMap;
+
 	// MFD Display-related variables
 	HDC hDC;	
 	DWORD Width, Height;
@@ -113,9 +117,8 @@ private:
 
 
 	// Functions
-	bool IsModeChangeKey(DWORD key) const;
-	bool IsAttitudeHoldToggleKey(DWORD key) const;
-	bool ProcessModeChangeKey(DWORD key);
+	void InitializeCommandMap();
+	bool ProcessKey(DWORD key);
 
 	VECTOR3 CalcPitchYawRollAngles();
 

@@ -31,7 +31,7 @@ void Display::DisplayText(const char* format, ...)
 	
 	va_end(args);
 	
-	IncrementCurrentLine();
+	PrintNewline();
 }
 
 void Display::SetTextColor(DWORD textColor)
@@ -57,7 +57,7 @@ void Display::PrintAngle(const char* name, double angle)
 
 	m_sketchPad->Text(TAB, m_currentLine,  m_displayBuffer, strlen(m_displayBuffer));
 	
-	IncrementCurrentLine();
+	PrintNewline();
 
 	// Adjust for negative number
 	/*if (Angle < 0) {
@@ -113,9 +113,9 @@ void Display::PrintAngleAndRate(const char* name, double angle, double rate)
 
 	m_sketchPad->Text(TAB * 2, m_currentLine,  m_displayBuffer, strlen(m_displayBuffer));
 
-	IncrementCurrentLine();
+	PrintNewline();
 }
-void Display::IncrementCurrentLine()
+void Display::PrintNewline()
 {
 	m_currentLine += m_lineHeight;
 }

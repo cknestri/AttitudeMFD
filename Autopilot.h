@@ -3,6 +3,7 @@
 #include "OrbiterSDK.h"
 #include <iostream>
 #include <fstream>
+#include <map>
 
 class Autopilot : public IAutopilot
 {

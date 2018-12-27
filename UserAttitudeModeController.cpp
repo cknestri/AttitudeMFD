@@ -46,7 +46,7 @@ bool UserAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	display->SetTextColor(RGB(255, 255, 255));
 	display->DisplayText("Attitude MFD");
 	display->SetTextColor(RGB(0, 255, 0));
-	display->IncrementCurrentLine();
+	display->PrintNewline();
 
 	if (m_isAutopilotEngaged)
 	{
@@ -68,21 +68,21 @@ bool UserAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 		DEG * m_status.arot.x,
 		DEG * m_status.arot.y,
 		DEG * m_status.arot.z );
-	display->IncrementCurrentLine();
+	display->PrintNewline();
 
 	display->PrintAngle("Set Pitch", m_relativeAttitude.data[PITCH]);
 	display->PrintAngle("Set Yaw ", m_relativeAttitude.data[YAW]);
 	display->PrintAngle("Set Roll", m_relativeAttitude.data[ROLL]);
 
-	display->IncrementCurrentLine();
-	display->IncrementCurrentLine();
+	display->PrintNewline();
+	display->PrintNewline();
 
 	display->PrintAngleAndRate("Pitch:", m_pitchYawRollAngles.data[PITCH], m_status.vrot.x);
 	display->PrintAngleAndRate("Yaw:", m_pitchYawRollAngles.data[YAW], m_status.vrot.y);
 	display->PrintAngleAndRate("Roll:", m_pitchYawRollAngles.data[ROLL], m_status.vrot.z);
 
-	display->IncrementCurrentLine();
-	display->IncrementCurrentLine();
+	display->PrintNewline();
+	display->PrintNewline();
 
 	return true;
 }
@@ -137,7 +137,7 @@ int UserAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** buttonMenu) 
 		{"Set Reference", "Attitude", '.'},
 	};
 
-	if (*buttonMenu != NULL)
+	if (buttonMenu != NULL)
 	{
 		*buttonMenu = s_buttonMenu;
 	}

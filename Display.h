@@ -12,7 +12,7 @@ public:
 	void Reset() override;
 	void DisplayText(const char* format, ...) override;
 	void SetTextColor(DWORD textColor) override;
-	void IncrementCurrentLine() override;
+	void PrintNewline() override;
 	void PrintAngle(const char* name, double angle) override;
 	void PrintAngleAndRate(const char* name, double angle, double rate) override;
 

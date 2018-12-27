@@ -93,6 +93,8 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	RelAttitude = NULL_VECTOR;
 	AttHoldMode = DISENGAGED;
 	
+	InitializeCommandMap();
+
 	// State that doesn't change, so we'll only get it once
 	Spacecraft = vessel;
 
@@ -187,6 +189,16 @@ int AttitudeMFD::MsgProc (UINT msg, UINT mfd, WPARAM wparam, LPARAM lparam)
 		return (int)(new AttitudeMFD (LOWORD(wparam), HIWORD(wparam), (VESSEL*)lparam));
 	}
 	return 0;
+}
+
+void AttitudeMFD::InitializeCommandMap()
+{
+	m_commandMap[OAPI_KEY_1] = [this]() { this->ChangeRefMode(USER_ATT); };
+	m_commandMap[OAPI_KEY_2] = [this]() { this->ChangeRefMode(VELOCITY); };
+	m_commandMap[OAPI_KEY_3] = [this]() { this->ChangeRefMode(TARGET_RELATIVE); };
+	m_commandMap[OAPI_KEY_4] = [this]() { this->ChangeRefMode(EI); };
+	//m_commandMap[OAPI_KEY_M] = [this]() { this->ChangeRefMode(); };
+	m_commandMap[OAPI_KEY_H] = [this]() { this->ToggleAttHoldMode(); };
 }
 
 void AttitudeMFD::StartModeTargetRelative()
@@ -790,14 +802,10 @@ void AttitudeMFD::ChangeRefMode(REF_MODE Mode)
 
 bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
 {
-	if (IsModeChangeKey(key))
+	InitializeCommandMap();
+
+	if (ProcessKey(key))
 	{
-		return ProcessModeChangeKey(key);
-	}
-	else if (IsAttitudeHoldToggleKey(key))
-	{
-		ToggleAttHoldMode();
-		
 		return true;
 	}
 	else
@@ -909,51 +917,37 @@ bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
 
 }
 
-bool AttitudeMFD::IsModeChangeKey(DWORD key) const
+bool AttitudeMFD::ProcessKey(DWORD key)
 {
-	// The M key only needs to be used as a backup, when the SHIFT + number
-	// is in use by a vessel, such as the shuttle's RMS
-	if (key == OAPI_KEY_M || 
-		key == OAPI_KEY_1 ||
-		key == OAPI_KEY_2 || 
-		key == OAPI_KEY_3 || 
-		key == OAPI_KEY_4)
+	/*auto iter = m_commandMap.find(key);
+
+	if (iter != m_commandMap.end())
 	{
+		iter->second();
 		return true;
 	}
 
-	return false;
-}
+	return false;*/
 
-bool AttitudeMFD::IsAttitudeHoldToggleKey(DWORD key) const
-{
-	return (key == OAPI_KEY_H);
-}
-
-bool AttitudeMFD::ProcessModeChangeKey(DWORD key)
-{
-	bool cbSetMode(void *id, char *str, void *data);
-
-	switch(key) {
-	case OAPI_KEY_M:
-		oapiOpenInputBox("Select Mode", cbSetMode, 0, 20, (void *)this);
+	switch (key) {
 	case OAPI_KEY_1:
 		ChangeRefMode(USER_ATT);
-		break;
+		return true;
 	case OAPI_KEY_2:
 		ChangeRefMode(VELOCITY);
-		break;
+		return true;
 	case OAPI_KEY_3:
 		ChangeRefMode(TARGET_RELATIVE);
-		break;
+		return true;
 	case OAPI_KEY_4:
 		ChangeRefMode(EI);
-		break;
-	default:
-		throw std::runtime_error("We got a key which is not a valid mode change");
-	}
+		return true;
+	case OAPI_KEY_H:
+		ToggleAttHoldMode();
+		return true;
+	};
 
-	return true;
+	return false;
 }
 
 int AttitudeMFD::ButtonMenu (const MFDBUTTONMENU **menu) const

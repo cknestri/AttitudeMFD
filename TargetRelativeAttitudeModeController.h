@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IAttitudeModeController.h"
+#include <vector>
 
 class TargetRelativeAttitudeModeController : public IAttitudeModeController
 {
@@ -24,4 +25,12 @@ private:
 	VESSEL* m_spacecraft;
 	DWORD m_displayWidth;
 	DWORD m_displayHeight;
+
+	unsigned int m_selectedTargetIndex;
+	std::vector<OBJHANDLE> m_targetList;
+	char m_targetName[100];
+	
+	void BuildTargetList();
+	double GetRelativeDistance(const OBJHANDLE objectHandle) const;
+	void SelectNextTarget();
 };

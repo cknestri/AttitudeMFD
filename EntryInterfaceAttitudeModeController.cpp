@@ -31,7 +31,7 @@ bool EntryInterfaceAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	display->SetTextColor(RGB(255, 255, 255));
 	display->DisplayText("Attitude MFD");
 	display->SetTextColor(RGB(0, 255, 0));
-	display->IncrementCurrentLine();
+	display->PrintNewline();
 
 	display->DisplayText("Ref Mode: Entry Interface");
 	
