@@ -1,8 +1,10 @@
 #pragma once
 
 #include "IAttitudeModeController.h"
+#include "BaseAttitudeModeController.h"
 #include "CDK.h"
 #include "IAutopilot.h"
+#include "IDisplay.h"
 
 typedef VECTOR3 Attitude;
 
@@ -11,9 +13,8 @@ class UserAttitudeModeController : public IAttitudeModeController
 public:
 	UserAttitudeModeController(
 		VESSEL* spacecraft,
-		DWORD displayWidth,
-		DWORD displayHeight,
-		const std::shared_ptr<IAutopilot>& autopilot);
+		const std::shared_ptr<IAutopilot>& autopilot,
+		const CreateDisplayFunction& createDisplay);
 	virtual ~UserAttitudeModeController();
 
 	void Start() override;
@@ -27,8 +28,6 @@ public:
 
 private:
 	VESSEL* m_spacecraft;
-	DWORD m_displayWidth;
-	DWORD m_displayHeight;
 	VESSELSTATUS m_status;
 	VECTOR3 m_globalSpacecraftPosition;
 	VECTOR3 m_pitchYawRollAngles;
@@ -36,6 +35,7 @@ private:
 	Attitude m_relativeAttitude;
 	bool m_isAutopilotEngaged;
 	std::shared_ptr<IAutopilot> m_autopilot;
+	CreateDisplayFunction m_createDisplay;
 
 	void CalculateAttitude();
 	void SetReferenceAttitude();

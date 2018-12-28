@@ -3,6 +3,7 @@
 
 class IDisplay
 {
+public:
 	virtual void Reset() = 0;
 	virtual void DisplayText(const char* format, ...) = 0;
 	virtual void SetTextColor(DWORD textColor) = 0;

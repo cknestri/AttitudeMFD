@@ -4,6 +4,7 @@
 #include "TargetRelativeAttitudeModeController.h"
 #include "EntryInterfaceAttitudeModeController.h"
 #include "Autopilot.h"
+#include "Display.h"
 #include <memory>
 
 IAttitudeModeController* GetAttitudeModeController(
@@ -14,14 +15,19 @@ IAttitudeModeController* GetAttitudeModeController(
 {
 	auto autopilot = std::make_shared<Autopilot>(spacecraft);
 
+	auto createDisplay = [displayWidth, displayHeight](oapi::Sketchpad* sketchpad)
+	{
+		return std::make_shared<Display>(sketchpad, displayWidth, displayHeight);
+	};
+
 	switch (mode)
 	{
 	case USER_ATT: 
-		return new UserAttitudeModeController(spacecraft, displayWidth, displayHeight, autopilot);
+		return new UserAttitudeModeController(spacecraft, autopilot, createDisplay);
 	case VELOCITY:
 		return new VelocityAttitudeModeController(spacecraft, displayWidth, displayHeight);
 	case TARGET_RELATIVE:
-		return new TargetRelativeAttitudeModeController(spacecraft, displayWidth, displayHeight, autopilot);
+		return new TargetRelativeAttitudeModeController(spacecraft, autopilot, createDisplay);
 	case EI:
 		return new EntryInterfaceAttitudeModeController(spacecraft, displayWidth, displayHeight);
 	default:

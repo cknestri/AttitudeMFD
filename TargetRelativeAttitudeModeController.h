@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IAttitudeModeController.h"
+#include "BaseAttitudeModeController.h"
 #include "IAutopilot.h"
 #include <vector>
 
@@ -9,9 +10,8 @@ class TargetRelativeAttitudeModeController : public IAttitudeModeController
 public:
 	TargetRelativeAttitudeModeController(
 		VESSEL* spacecraft,
-		DWORD displayWidth,
-		DWORD displayHeight,
-		const std::shared_ptr<IAutopilot>& autopilot);
+		const std::shared_ptr<IAutopilot>& autopilot,
+		const CreateDisplayFunction& createDisplay);
 	virtual ~TargetRelativeAttitudeModeController();
 
 	void Start() override;
@@ -25,11 +25,10 @@ public:
 
 private:
 	VESSEL* m_spacecraft;
-	DWORD m_displayWidth;
-	DWORD m_displayHeight;
 	VESSELSTATUS m_status;
 	bool m_isAutopilotEngaged;
 	std::shared_ptr<IAutopilot> m_autopilot;
+	CreateDisplayFunction m_createDisplay;
 
 	unsigned int m_selectedTargetIndex;
 	std::vector<OBJHANDLE> m_targetList;

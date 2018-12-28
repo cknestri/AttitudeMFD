@@ -1,7 +1,6 @@
 #include "TargetRelativeAttitudeModeController.h"
 #include "OrbiterSDK.h"
 #include "CDK.h"
-#include "Display.h"
 #include <algorithm>
 
 using namespace std;
@@ -21,13 +20,11 @@ static VECTOR3 GetPY(VECTOR3 PitchYaw)
 
 TargetRelativeAttitudeModeController::TargetRelativeAttitudeModeController(
 	VESSEL* spacecraft,
-	DWORD displayWidth,
-	DWORD displayHeight,
-	const shared_ptr<IAutopilot>& autopilot)
+	const shared_ptr<IAutopilot>& autopilot,
+	const CreateDisplayFunction& createDisplay)
 	: m_spacecraft(spacecraft)
-	, m_displayWidth(displayWidth)
-	, m_displayHeight(displayHeight)
 	, m_autopilot(autopilot)
+	, m_createDisplay(createDisplay)
 	, m_isAutopilotEngaged(false)
 	, m_selectedTargetIndex(0)
 	, m_relativePosition(NULL_VECTOR)
@@ -51,7 +48,7 @@ void TargetRelativeAttitudeModeController::Start()
 
 bool TargetRelativeAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 {
-	Display* display = new Display(sketchpad, m_displayWidth, m_displayHeight);
+	auto display = m_createDisplay(sketchpad);
 
 	display->Reset();
 	

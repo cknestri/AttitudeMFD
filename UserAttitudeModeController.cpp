@@ -1,7 +1,6 @@
 #include "UserAttitudeModeController.h"
 #include "OrbiterSDK.h"
 #include "CDK.h"
-#include "Display.h"
 
 using namespace std;
 
@@ -13,13 +12,11 @@ typedef struct {
 
 UserAttitudeModeController::UserAttitudeModeController(
 	VESSEL* spacecraft,
-	DWORD displayWidth,
-	DWORD displayHeight,
-	const shared_ptr<IAutopilot>& autopilot)
+	const shared_ptr<IAutopilot>& autopilot,
+	const CreateDisplayFunction& createDisplay)
 	: m_spacecraft(spacecraft)
-	, m_displayWidth(displayWidth)
-	, m_displayHeight(displayHeight)
 	, m_autopilot(autopilot)
+	, m_createDisplay(createDisplay)
 	, m_globalSpacecraftPosition(NULL_VECTOR)
 	, m_pitchYawRollAngles(NULL_VECTOR)
 	, m_referenceAttitude(NULL_VECTOR)
@@ -40,7 +37,7 @@ void UserAttitudeModeController::Start()
 
 bool UserAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 {
-	Display* display = new Display(sketchpad, m_displayWidth, m_displayHeight);
+	auto display = m_createDisplay(sketchpad);
 
 	display->Reset();
 	
