@@ -57,7 +57,15 @@ bool TargetRelativeAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	display->SetTextColor(RGB(0, 255, 0));
 	display->PrintNewline();
 
-	display->DisplayText("Ref Mode: Target Relative");
+	if (m_isAutopilotEngaged)
+	{
+		display->DisplayText("Ref Mode: Target Relative  (Hold)");
+	}
+	else
+	{
+		display->DisplayText("Ref Mode: Target Relative");
+	}
+
 	display->PrintNewline();
 	display->DisplayText("Target Name: %s", m_targetName);
 
