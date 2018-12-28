@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IAttitudeModeController.h"
+#include "IAutopilot.h"
 #include <vector>
 
 class TargetRelativeAttitudeModeController : public IAttitudeModeController
@@ -25,12 +26,26 @@ private:
 	VESSEL* m_spacecraft;
 	DWORD m_displayWidth;
 	DWORD m_displayHeight;
+	VESSELSTATUS m_status;
+	bool m_isAutopilotEngaged;
+	IAutopilot* m_autopilot;
 
 	unsigned int m_selectedTargetIndex;
 	std::vector<OBJHANDLE> m_targetList;
 	char m_targetName[100];
 	
+	VECTOR3 m_relativePosition;
+	VECTOR3 m_relativeVelocity;
+	double m_radialVelocity;
+	VECTOR3 m_pitchYawAngles;
+
 	void BuildTargetList();
-	double GetRelativeDistance(const OBJHANDLE objectHandle) const;
+	double GetRelativeDistanceToObject(const OBJHANDLE objectHandle) const;
+	void SetRelativePositionToSelectedTarget();
+	void SetRelativeVelocityToSelectedTarget();
+	void SetRadialVelocityToSelectedTarget();
+	void GetLocalPositionOfObject(OBJHANDLE object, VECTOR3& localPosition) const;
+	OBJHANDLE GetSelectedTargetHandle() const;
 	void SelectNextTarget();
+	void SelectPreviousTarget();
 };

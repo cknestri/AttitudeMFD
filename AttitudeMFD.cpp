@@ -650,7 +650,7 @@ void AttitudeMFD::Update(oapi::Sketchpad* sketchpad)
 
 void AttitudeMFD::DisplayTargetRelative()
 {
-	char Buffer[100];
+	/*char Buffer[100];
 
 	PrintRefMode();
 
@@ -681,7 +681,7 @@ void AttitudeMFD::DisplayTargetRelative()
 	CurrentLine += 2 * LINE;
 
 	PrintRotThrust();
-
+	*/
 }
 
 
@@ -802,8 +802,6 @@ void AttitudeMFD::ChangeRefMode(REF_MODE Mode)
 
 bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
 {
-	InitializeCommandMap();
-
 	if (ProcessKey(key))
 	{
 		return true;
@@ -919,33 +917,13 @@ bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
 
 bool AttitudeMFD::ProcessKey(DWORD key)
 {
-	/*auto iter = m_commandMap.find(key);
+	auto iter = m_commandMap.find(key);
 
 	if (iter != m_commandMap.end())
 	{
 		iter->second();
 		return true;
 	}
-
-	return false;*/
-
-	switch (key) {
-	case OAPI_KEY_1:
-		ChangeRefMode(USER_ATT);
-		return true;
-	case OAPI_KEY_2:
-		ChangeRefMode(VELOCITY);
-		return true;
-	case OAPI_KEY_3:
-		ChangeRefMode(TARGET_RELATIVE);
-		return true;
-	case OAPI_KEY_4:
-		ChangeRefMode(EI);
-		return true;
-	case OAPI_KEY_H:
-		ToggleAttHoldMode();
-		return true;
-	};
 
 	return false;
 }
