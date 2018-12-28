@@ -8,7 +8,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AUTOPILOT_MFD_H
 #define AUTOPILOT_MFD_H
-#include "TargetObj.h"
 #include "List.h"
 #include "CDK.h"
 #include "IAttitudeModeController.h"
@@ -48,9 +47,6 @@ const int MAX_TARGET_NAME = 50;
 const double UPDATE_INTERVAL = 1.0;		// How much time should pass between updates
 
 
-// For ease of accessing the target list
-#define CurrentTarget (TargetList.GetCurrent()).GetObj()
-
 class AttitudeMFD: public MFD2 {
 public:
 
@@ -62,7 +58,6 @@ public:
 	
 	static int MsgProc (UINT msg, UINT mfd, WPARAM wparam, LPARAM lparam);
 	bool ConsumeKeyBuffered(DWORD key);
-	bool SelectTarget(char *name);
 	int ButtonMenu (const MFDBUTTONMENU **menu) const;
 	bool SetRelAttitude(char *str, AXIS Axis);
 	void ChangeRefMode(REF_MODE Mode);
@@ -89,7 +84,6 @@ private:
 
 	
 	// For TARGET_RELATIVE reference mode
-	List<TargetObj> TargetList;	// List of targets, sorted by distance (nearest to farthest)
 	OBJHANDLE TargetRef;
 	char TargetName[MAX_TARGET_NAME];
 	int Index;
@@ -150,12 +144,6 @@ private:
 	void ToggleTrimStatus();
 	void PrintMFDHeading();
 	void SetRefAttitude();
-	void SelectNextTarget();
-	void SelectPrevTarget();
-	void SelectClosestTarget();
-	void SetTarget();
-	void UpdateTargetList();
-	void BuildTargetList();
 	bool SelectBase();
 	void PrintRefMode();
 	void PrintAngleRate(const char *Heading, double Angle, double Rate);

@@ -205,7 +205,6 @@ void AttitudeMFD::StartModeTargetRelative()
 {
 
 	TrimStatus = T_DISENGAGED;
-	SelectClosestTarget();
 
 	CalcTargetRelative();
 }
@@ -966,23 +965,6 @@ int AttitudeMFD::ButtonMenu (const MFDBUTTONMENU **menu) const
 	//return NUM_CMNDS;
 }
 
-bool AttitudeMFD::SelectTarget(char *Name)
-{
-	OBJHANDLE Obj = oapiGetObjectByName(Name);
-
-	if (Obj) {
-		UpdateTargetList();
-		
-		for (unsigned int i = 0; (i < oapiGetObjectCount()) && (Obj != CurrentTarget); TargetList.Next())
-			;
-		SetTarget();
-
-		return true;
-	}
-
-	return false;
-}
-
 
 bool AttitudeMFD::SelectBase()
 {
@@ -1000,83 +982,6 @@ bool AttitudeMFD::SelectBase()
 	}
 
 	return false;
-}
-
-
-void AttitudeMFD::SelectNextTarget()
-{
-	UpdateTargetList();
-	TargetList.Next();
-
-	// We don't want to select ourselves
-	if (CurrentTarget == oapiGetFocusObject()) {
-		TargetList.Next();		
-	}
-	
-	SetTarget();
-}
-
-void AttitudeMFD::SelectPrevTarget()
-{
-	UpdateTargetList();
-	TargetList.Prev();
-
-	// We don't want to select ourselves
-	if (CurrentTarget == oapiGetFocusObject()) {
-		TargetList.Prev();		
-	}
-
-	SetTarget();
-}
-
-void AttitudeMFD::SelectClosestTarget()
-{
-	UpdateTargetList();
-	TargetList.ResetCurrent();
-	TargetList.Next();
-
-	SetTarget();
-}
-
-// Sets the target to the current object in the target list
-void AttitudeMFD::SetTarget()
-{
-	// Set the TargetRef and target name for the MFD
-	TargetRef = CurrentTarget;
-	oapiGetObjectName(TargetRef, TargetName, MAX_TARGET_NAME); 
-}
-
-// In the default case (no new objects and the existing ones are sorted) this should quickly
-// fall through.
-void inline AttitudeMFD::UpdateTargetList()
-{
-	// See if any new objects have been added to the universe.  This assumes that
-	// once an object is created, it never is deleted.  This will break if an object is both
-	// added and deleted, resulting in the same total number of objects.  However, I think
-	// that this should work in practice.
-	if (oapiGetObjectCount() != (unsigned int)TargetList.Length()) {
-		BuildTargetList();
-	} else {
-		TargetList.Sort();
-	}
-}
-
-void AttitudeMFD::BuildTargetList()
-{
-	OBJHANDLE Obj;
-	TargetObj Target;
-
-	// Clear existing list
-	TargetList.DeleteList();
-
-	for (unsigned int i = 0; i < oapiGetObjectCount(); i++) {
-		Obj = oapiGetObjectByIndex(i);
-		Target.SetObj(Obj);
-		TargetList.Insert(Target);
-	}
-
-	// Sort the new list
-	TargetList.Sort();
 }
 
 void inline AttitudeMFD::PrintMFDHeading()
@@ -1500,11 +1405,6 @@ bool inline AttitudeMFD::HaveRetroEngine()
 bool inline AttitudeMFD::HaveHoverEngine()
 {
 	return MaxHoverThrust > 0;
-}
-
-bool cbSelectTarget(void *id, char *str, void *data)
-{
-	return (((AttitudeMFD *)data)->SelectTarget(str));
 }
 
 bool cbSetRelAttPitch(void *id, char *str, void *data)
