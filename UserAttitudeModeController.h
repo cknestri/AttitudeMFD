@@ -12,7 +12,8 @@ public:
 	UserAttitudeModeController(
 		VESSEL* spacecraft,
 		DWORD displayWidth,
-		DWORD displayHeight);
+		DWORD displayHeight,
+		const std::shared_ptr<IAutopilot>& autopilot);
 	virtual ~UserAttitudeModeController();
 
 	void Start() override;
@@ -34,7 +35,7 @@ private:
 	Attitude m_referenceAttitude;
 	Attitude m_relativeAttitude;
 	bool m_isAutopilotEngaged;
-	IAutopilot* m_autopilot;
+	std::shared_ptr<IAutopilot> m_autopilot;
 
 	void CalculateAttitude();
 	void SetReferenceAttitude();

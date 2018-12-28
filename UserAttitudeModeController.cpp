@@ -2,7 +2,8 @@
 #include "OrbiterSDK.h"
 #include "CDK.h"
 #include "Display.h"
-#include "Autopilot.h"
+
+using namespace std;
 
 typedef struct {
 	VECTOR3 Pitch;
@@ -13,22 +14,22 @@ typedef struct {
 UserAttitudeModeController::UserAttitudeModeController(
 	VESSEL* spacecraft,
 	DWORD displayWidth,
-	DWORD displayHeight)
+	DWORD displayHeight,
+	const shared_ptr<IAutopilot>& autopilot)
 	: m_spacecraft(spacecraft)
 	, m_displayWidth(displayWidth)
 	, m_displayHeight(displayHeight)
+	, m_autopilot(autopilot)
 	, m_globalSpacecraftPosition(NULL_VECTOR)
 	, m_pitchYawRollAngles(NULL_VECTOR)
 	, m_referenceAttitude(NULL_VECTOR)
 	, m_relativeAttitude(NULL_VECTOR)
 	, m_isAutopilotEngaged(false)
 {
-	m_autopilot = new Autopilot(spacecraft);
 }
 
 UserAttitudeModeController::~UserAttitudeModeController()
 {
-	delete m_autopilot;
 }
 
 void UserAttitudeModeController::Start()

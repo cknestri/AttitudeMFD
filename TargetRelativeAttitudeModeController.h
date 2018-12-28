@@ -10,7 +10,8 @@ public:
 	TargetRelativeAttitudeModeController(
 		VESSEL* spacecraft,
 		DWORD displayWidth,
-		DWORD displayHeight);
+		DWORD displayHeight,
+		const std::shared_ptr<IAutopilot>& autopilot);
 	virtual ~TargetRelativeAttitudeModeController();
 
 	void Start() override;
@@ -28,7 +29,7 @@ private:
 	DWORD m_displayHeight;
 	VESSELSTATUS m_status;
 	bool m_isAutopilotEngaged;
-	IAutopilot* m_autopilot;
+	std::shared_ptr<IAutopilot> m_autopilot;
 
 	unsigned int m_selectedTargetIndex;
 	std::vector<OBJHANDLE> m_targetList;

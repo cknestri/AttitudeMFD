@@ -1,7 +1,6 @@
 #include "TargetRelativeAttitudeModeController.h"
 #include "OrbiterSDK.h"
 #include "CDK.h"
-#include "Autopilot.h"
 #include "Display.h"
 #include <algorithm>
 
@@ -23,10 +22,12 @@ static VECTOR3 GetPY(VECTOR3 PitchYaw)
 TargetRelativeAttitudeModeController::TargetRelativeAttitudeModeController(
 	VESSEL* spacecraft,
 	DWORD displayWidth,
-	DWORD displayHeight)
+	DWORD displayHeight,
+	const shared_ptr<IAutopilot>& autopilot)
 	: m_spacecraft(spacecraft)
 	, m_displayWidth(displayWidth)
 	, m_displayHeight(displayHeight)
+	, m_autopilot(autopilot)
 	, m_isAutopilotEngaged(false)
 	, m_selectedTargetIndex(0)
 	, m_relativePosition(NULL_VECTOR)
@@ -34,12 +35,10 @@ TargetRelativeAttitudeModeController::TargetRelativeAttitudeModeController(
 	, m_radialVelocity(0.0)
 	, m_pitchYawAngles(NULL_VECTOR)
 {
-	m_autopilot = new Autopilot(spacecraft);
 }
 
 TargetRelativeAttitudeModeController::~TargetRelativeAttitudeModeController()
 {
-	delete m_autopilot;
 }
 
 void TargetRelativeAttitudeModeController::Start()
