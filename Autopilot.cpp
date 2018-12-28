@@ -178,12 +178,11 @@ bool Autopilot::SetRotationRateInAxis(AXIS axis, double targetRotationRate, doub
 	return false;
 }
 
-void Autopilot::Disable()
+void Autopilot::ShutdownAllEngines()
 {
 	ShutdownRotationThrustersInAxis(PITCH);
 	ShutdownRotationThrustersInAxis(YAW);
 	ShutdownRotationThrustersInAxis(ROLL);
-
 }
 
 bool Autopilot::NullRotationRateInAxis(AXIS axis, double deltaTime)

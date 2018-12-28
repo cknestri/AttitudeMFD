@@ -27,5 +27,5 @@ public:
 		DEADBAND deadBand,
 		double deltaTime) = 0;
 
-	virtual void Disable() = 0;
+	virtual void ShutdownAllEngines() = 0;
 };

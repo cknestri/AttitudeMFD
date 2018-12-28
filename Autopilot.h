@@ -24,7 +24,7 @@ public:
 		DEADBAND deadBand,
 		double deltaTime) override;
 
-	void Disable() override;
+	void ShutdownAllEngines() override;
 
 private:
 	VESSEL* m_spacecraft;

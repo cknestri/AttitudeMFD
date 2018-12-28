@@ -101,7 +101,7 @@ void UserAttitudeModeController::EnableAutopilot()
 void UserAttitudeModeController::DisableAutopilot()
 {
 	m_isAutopilotEngaged = false;
-	m_autopilot->Disable();
+	m_autopilot->ShutdownAllEngines();
 }
 
 void UserAttitudeModeController::Control()

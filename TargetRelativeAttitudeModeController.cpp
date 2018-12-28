@@ -95,7 +95,7 @@ void TargetRelativeAttitudeModeController::EnableAutopilot()
 void TargetRelativeAttitudeModeController::DisableAutopilot()
 {
 	m_isAutopilotEngaged = false;
-	m_autopilot->Disable();
+	m_autopilot->ShutdownAllEngines();
 }
 
 void TargetRelativeAttitudeModeController::Control()
