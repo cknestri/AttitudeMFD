@@ -102,14 +102,14 @@ void TargetRelativeAttitudeModeController::BuildTargetList()
 	m_targetList.clear();
 	m_targetList.reserve(objectCount);
 
-	for (unsigned int objectIndex; objectIndex < objectCount; objectIndex++)
+	for (unsigned int objectIndex = 0; objectIndex < objectCount; objectIndex++)
 	{
 		m_targetList.push_back(oapiGetObjectByIndex(objectIndex));
 	}
 
 	std::sort(m_targetList.begin(), m_targetList.end(), [this](const OBJHANDLE object1, const OBJHANDLE object2)
 	{
-		return (GetRelativeDistance(object1) > GetRelativeDistance(object2));
+		return (GetRelativeDistance(object2) > GetRelativeDistance(object1));
 	});
 }
 
