@@ -35,6 +35,33 @@ void UserAttitudeModeController::Start()
 	CalculateAttitude();
 }
 
+	//char Buffer[100];
+	//PrintRefMode();
+
+	//sprintf(Buffer, "Reference Att: %.1f %.1f %.1f", 
+	//			DEG * RefAttitude.x, DEG * RefAttitude.y, DEG * RefAttitude.z );
+	//TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
+	//CurrentLine += LINE;	
+
+	//sprintf(Buffer, "Current Att:   %.1f %.1f %.1f", 
+	//		DEG * Status.arot.x, DEG * Status.arot.y, DEG * Status.arot.z );
+	//TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
+	//CurrentLine += 2 * LINE;
+
+	//PrintAngle("Set Pitch", RelAttitude.data[PITCH]);
+	//PrintAngle("Set Yaw ", RelAttitude.data[YAW]);
+	//PrintAngle("Set Roll", RelAttitude.data[ROLL]);
+	//CurrentLine += 2 * LINE;
+
+
+	//PrintAngleRate("Pitch:", PitchYawRoll.data[PITCH], Status.vrot.x);
+	//PrintAngleRate("Yaw:", PitchYawRoll.data[YAW], Status.vrot.y);
+	//PrintAngleRate("Roll:", PitchYawRoll.data[ROLL], Status.vrot.z);
+
+	//CurrentLine += 2 * LINE;
+
+	//PrintRotThrust();
+
 bool UserAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 {
 	auto display = m_createDisplay(sketchpad);

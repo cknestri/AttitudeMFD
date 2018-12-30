@@ -46,6 +46,39 @@ void TargetRelativeAttitudeModeController::Start()
 	oapiGetObjectName(m_targetList[m_selectedTargetIndex], m_targetName, sizeof(m_targetName));
 }
 
+/*char Buffer[100];
+
+PrintRefMode();
+
+sprintf(Buffer, "Target: %s", TargetName);
+TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
+CurrentLine += LINE;
+
+// Print distance
+sprintf(Buffer, "Distance:", 8);
+TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
+ScaleOutput(Buffer, Mag(RelPos));
+TextOut(hDC, 100, CurrentLine, Buffer, strlen(Buffer));
+CurrentLine += LINE;
+sprintf(Buffer, "Rad Vel:", 8);
+TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
+ScaleOutput(Buffer, RadialVel);
+TextOut(hDC, 100, CurrentLine, Buffer, strlen(Buffer));
+CurrentLine += 2 * LINE;
+
+PrintRelVel();
+CurrentLine += 2 * LINE;
+
+
+PrintAngleRate("Pitch:", PitchYawRoll.data[PITCH], Status.vrot.x);
+PrintAngleRate("Yaw:", PitchYawRoll.data[YAW], Status.vrot.y);
+PrintAngleRate("Roll:", PitchYawRoll.data[ROLL], Status.vrot.z);
+
+CurrentLine += 2 * LINE;
+
+PrintRotThrust();
+*/
+
 bool TargetRelativeAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 {
 	auto display = m_createDisplay(sketchpad);

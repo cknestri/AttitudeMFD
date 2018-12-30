@@ -132,9 +132,7 @@ private:
 	void SetTrimThrustLevel(T_AXIS Axis);
 	void Trim();
 
-	void DisplayTargetRelative();
 	void DisplayVelocity();	
-	void DisplayAttitude();
 	void DisplayEI();
 
 	void StartModeTargetRelative();

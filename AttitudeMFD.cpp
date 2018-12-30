@@ -658,71 +658,6 @@ bool AttitudeMFD::Update(oapi::Sketchpad* sketchpad)
 {
 	return m_attitudeModeController->Update(sketchpad);
 }
-/*
-void AttitudeMFD::Update(oapi::Sketchpad* sketchpad)
-{
-	CurrentLine = 0;
-	hDC = hdc;
-
-	PrintMFDHeading();
-	CurrentLine += LINE;
-
-	switch (RefMode) {
-	case USER_ATT:
-		m_attitudeModeController->Update(hdc);
-		//DisplayAttitude();
-		break;
-	case VELOCITY:
-		DisplayVelocity();
-		break;
-	case TARGET_RELATIVE:
-		DisplayTargetRelative();
-		break;
-	case EI:
-		DisplayEI();
-		break;
-	};
-	
-}
-*/
-
-
-void AttitudeMFD::DisplayTargetRelative()
-{
-	/*char Buffer[100];
-
-	PrintRefMode();
-
-	sprintf(Buffer, "Target: %s", TargetName);
-	TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
-	CurrentLine += LINE;
-
-	// Print distance
-	sprintf(Buffer, "Distance:", 8);
-	TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
-	ScaleOutput(Buffer, Mag(RelPos));
-	TextOut(hDC, 100, CurrentLine, Buffer, strlen(Buffer));
-	CurrentLine += LINE;
-	sprintf(Buffer, "Rad Vel:", 8);
-	TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
-	ScaleOutput(Buffer, RadialVel);
-	TextOut(hDC, 100, CurrentLine, Buffer, strlen(Buffer));
-	CurrentLine += 2 * LINE;
-
-	PrintRelVel();
-	CurrentLine += 2 * LINE;
-
-
-	PrintAngleRate("Pitch:", PitchYawRoll.data[PITCH], Status.vrot.x);
-	PrintAngleRate("Yaw:", PitchYawRoll.data[YAW], Status.vrot.y);
-	PrintAngleRate("Roll:", PitchYawRoll.data[ROLL], Status.vrot.z);
-
-	CurrentLine += 2 * LINE;
-
-	PrintRotThrust();
-	*/
-}
-
 
 
 void AttitudeMFD::DisplayVelocity()
@@ -753,38 +688,6 @@ void AttitudeMFD::DisplayVelocity()
 	PrintRotThrust();
 
 }
-
-void AttitudeMFD::DisplayAttitude()
-{
-	char Buffer[100];
-	PrintRefMode();
-
-	sprintf(Buffer, "Reference Att: %.1f %.1f %.1f", 
-				DEG * RefAttitude.x, DEG * RefAttitude.y, DEG * RefAttitude.z );
-	TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
-	CurrentLine += LINE;	
-
-	sprintf(Buffer, "Current Att:   %.1f %.1f %.1f", 
-			DEG * Status.arot.x, DEG * Status.arot.y, DEG * Status.arot.z );
-	TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
-	CurrentLine += 2 * LINE;
-
-	PrintAngle("Set Pitch", RelAttitude.data[PITCH]);
-	PrintAngle("Set Yaw ", RelAttitude.data[YAW]);
-	PrintAngle("Set Roll", RelAttitude.data[ROLL]);
-	CurrentLine += 2 * LINE;
-
-
-	PrintAngleRate("Pitch:", PitchYawRoll.data[PITCH], Status.vrot.x);
-	PrintAngleRate("Yaw:", PitchYawRoll.data[YAW], Status.vrot.y);
-	PrintAngleRate("Roll:", PitchYawRoll.data[ROLL], Status.vrot.z);
-
-	CurrentLine += 2 * LINE;
-
-	PrintRotThrust();
-
-}
-
 
 void AttitudeMFD::DisplayEI()
 {
