@@ -627,27 +627,6 @@ bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
 	//	}
 	//	return true;
 
-	//// Target relative keys
-	//case OAPI_KEY_T:
-	//	if (RefMode == TARGET_RELATIVE) {
-	//		oapiOpenInputBox("Select Target", cbSelectTarget, 0, 20, (void *)this);
-	//	}
-	//	return true;
-	//case OAPI_KEY_N:
-	//	if (RefMode == TARGET_RELATIVE) {
-	//		SelectNextTarget();
-	//	}
-	//	return true;
-	//case OAPI_KEY_SPACE:
-	//	if (RefMode == TARGET_RELATIVE) {
-	//		SelectClosestTarget();
-	//	}
-	//	return true;
-	//case OAPI_KEY_B:
-	//	if (RefMode == TARGET_RELATIVE) {
-	//		SelectBase();
-	//	}
-	//	return true;
 
 	//case OAPI_KEY_H:
 	//	ToggleAttHoldMode();
@@ -659,29 +638,6 @@ bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
 	//	if (RefMode == USER_ATT) {
 	//		SetRefAttitude();
 	//	}
-	//	return true;
-
-	//// Trim functions
-	//case OAPI_KEY_NUMPAD5:
-	//	SetTrimMode(T_ALL);
-	//	return true;
-	//case OAPI_KEY_NUMPAD1:
-	//	SetTrimMode(T_VERT);
-	//	return true;
-	//case OAPI_KEY_NUMPAD2:
-	//	SetTrimMode(T_LAT);
-	//	return true;
-	//case OAPI_KEY_NUMPAD3:
-	//	SetTrimMode(T_FA);
-	//	return true;
-	//case OAPI_KEY_NUMPAD7:
-	//	SetTrimMode(T_VERT_LAT);
-	//	return true;
-	//case OAPI_KEY_NUMPAD8:
-	//	SetTrimMode(T_LAT_FA);
-	//	return true;
-	//case OAPI_KEY_NUMPAD9:
-	//	SetTrimMode(T_VERT_FA);
 	//	return true;
 
 	//default:
@@ -728,19 +684,6 @@ int AttitudeMFD::ButtonMenu (const MFDBUTTONMENU **menu) const
 	//	{"Toggle Color Mode", 0, 'C'},
 
 
-	//	{"Next Target", "(Target Mode)", 'N'},
-	//	{"Prev Target", "(Target Mode)", 'P'},
-	//	{"Closest Target", "(Target Mode)", ' '},
-	//	{"Select Base", "(Target Mode)", 'B'},
-
-	//
-	//	{"Trim Vertical", "(Numpad)", '1'},
-	//	{"Trim Lateral", "(Numpad)", '2'},
-	//	{"Trim F/A", "(Numpad)", '3'},
-	//	{"Trim All", "(Numpad)", '5'},
-	//	{"Trim Vert, Lat", "(Numpad)", '7'},
-	//	{"Trim Lat, F/A", "(Numpad)", '8'},
-	//	{"Trim Vert, F/A", "(Numpad)", '9'}
 	//};
 	//if (menu) *menu = mnu;
 	//return NUM_CMNDS;
