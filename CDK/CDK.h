@@ -19,6 +19,8 @@ enum AXIS
 	ROLL
 };
 
+#define DimensionOf(array) (sizeof(array)/sizeof(array[0]))
+
 // Prototypes for general functions
 //void ScaleOutput(char *Buffer, double Value);
 void PrintVector(VECTOR3 Vec);

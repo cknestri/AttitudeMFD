@@ -117,13 +117,6 @@ void TargetRelativeAttitudeModeController::Control()
 int TargetRelativeAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** buttonMenu) const
 {
 	static const MFDBUTTONMENU s_buttonMenu[] = {
-		{"User Att", "Mode", '1'},
-		{"Velocity", "Mode", '2'},
-		{"Target Rel", "Mode", '3'},
-		{"Entry Interface", "Mode", '4'},
-		{"Select Mode", nullptr, 'M'},
-		{"Attitude Hold", nullptr, 'H'},
-
 		{"Next Target", nullptr, 'N'},
 		{"Prev Target", nullptr, 'P'},
 		//{"Closest Target", nullptr, ' '},

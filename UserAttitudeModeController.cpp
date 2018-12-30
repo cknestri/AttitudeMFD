@@ -123,16 +123,10 @@ void UserAttitudeModeController::SetReferenceAttitude()
 int UserAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** buttonMenu) const
 {
 	static const MFDBUTTONMENU s_buttonMenu[] = {
-		{"User Att", "Mode", '1'},
-		{"Velocity", "Mode", '2'},
-		{"Target Rel", "Mode", '3'},
-		{"Entry Interface", "Mode", '4'},
-		{"Select Mode", 0, 'M'},
+		{"Set Reference", "Attitude", '.'},
 		{"Set Pitch", 0, 'P'},
 		{"Set Yaw", 0, 'Y'},
 		{"Set Roll", 0, 'R'},
-		{"Attitude Hold", 0, 'H'},
-		{"Set Reference", "Attitude", '.'},
 	};
 
 	if (buttonMenu != NULL)

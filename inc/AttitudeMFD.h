@@ -67,6 +67,9 @@ private:
 
 	std::map<DWORD, std::function<void()>> m_commandMap;
 
+	MFDBUTTONMENU* m_buttonMenu;
+	int m_buttonMenuSize;
+
 	// MFD Display-related variables
 	HDC hDC;	
 	DWORD Width, Height;
@@ -112,6 +115,7 @@ private:
 
 	// Functions
 	void InitializeCommandMap();
+	void BuildButtonMenu();
 	bool ProcessKey(DWORD key);
 
 	VECTOR3 CalcPitchYawRollAngles();

@@ -17,6 +17,8 @@
 #include "CDK.h"
 #include "AttitudeModeControllerFactory.h"
 
+using namespace std;
+
 static struct {  
 	int mode;
 	AttitudeMFD *CurrentMFD1, *CurrentMFD2;	// This allows two opens copies at once
@@ -78,7 +80,10 @@ DLLCLBK void opcPostStep(double SimT, double SimDT, double mjd)
 
 
 AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
-: MFD2 (w, h, vessel)
+	: MFD2 (w, h, vessel)
+	, m_attitudeModeController(nullptr)
+	, m_buttonMenu(nullptr)
+	, m_buttonMenuSize(0)
 {
 	// First, for the callback
 	if (!g_AttitudeMFD.CurrentMFD1) {
@@ -88,8 +93,7 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	}
 
 	TimeElapsed = 0.0;
-
-	RefMode = USER_ATT;
+	
 	RelAttitude = NULL_VECTOR;
 	AttHoldMode = DISENGAGED;
 	
@@ -98,7 +102,7 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	// State that doesn't change, so we'll only get it once
 	Spacecraft = vessel;
 
-	m_attitudeModeController = GetAttitudeModeController(RefMode, Spacecraft, w, h);
+	ChangeRefMode(USER_ATT);
 
 	// Let's prime the pump :-)  We'll just lie about the time
 	UpdateState(1.0);
@@ -136,6 +140,8 @@ AttitudeMFD::~AttitudeMFD()
 
 	// Save our state for future use
 	SaveStatus();
+
+	delete m_buttonMenu;
 }
 
 void AttitudeMFD::SaveStatus()
@@ -199,6 +205,40 @@ void AttitudeMFD::InitializeCommandMap()
 	m_commandMap[OAPI_KEY_4] = [this]() { this->ChangeRefMode(EI); };
 	//m_commandMap[OAPI_KEY_M] = [this]() { this->ChangeRefMode(); };
 	m_commandMap[OAPI_KEY_H] = [this]() { this->ToggleAttHoldMode(); };
+}
+
+void AttitudeMFD::BuildButtonMenu()
+{
+	static const MFDBUTTONMENU s_buttonMenuCommon[] = {
+		{"User Att", "Mode", '1'},
+		{"Velocity", "Mode", '2'},
+		{"Target Rel", "Mode", '3'},
+		{"Entry Interface", "Mode", '4'},
+		{"Select Mode", 0, 'M'},
+	};
+	static const size_t s_buttonMenuCommonSize = DimensionOf(s_buttonMenuCommon);
+
+	const MFDBUTTONMENU* attitudeModeControllerButtonMenu = nullptr;
+	int attitudeModeControllerButtonMenuSize = m_attitudeModeController->GetButtonMenu(&attitudeModeControllerButtonMenu);
+
+	m_buttonMenuSize = s_buttonMenuCommonSize + attitudeModeControllerButtonMenuSize;
+
+	delete m_buttonMenu;
+	m_buttonMenu = new MFDBUTTONMENU[m_buttonMenuSize];
+
+	unsigned int buttonMenuIndex = 0;
+
+	for (int index = 0; index < s_buttonMenuCommonSize; index++)
+	{
+		m_buttonMenu[buttonMenuIndex] = s_buttonMenuCommon[index];
+		buttonMenuIndex++;
+	}
+
+	for (int index = 0; index < attitudeModeControllerButtonMenuSize; index++)
+	{
+		m_buttonMenu[buttonMenuIndex] = attitudeModeControllerButtonMenu[index];
+		buttonMenuIndex++;
+	}
 }
 
 void AttitudeMFD::StartModeTargetRelative()
@@ -790,13 +830,19 @@ void AttitudeMFD::DisplayEI()
 void AttitudeMFD::ChangeRefMode(REF_MODE Mode)
 {	
 	AttHoldMode = DISENGAGED;
-	m_attitudeModeController->DisableAutopilot();
+
+	if (m_attitudeModeController != nullptr)
+	{
+		m_attitudeModeController->DisableAutopilot();
+	}
 
 	RefMode = Mode;
 
 	delete m_attitudeModeController;
 	m_attitudeModeController = GetAttitudeModeController(RefMode, Spacecraft, Width, Height);
 	m_attitudeModeController->Start();
+
+	BuildButtonMenu();
 }
 
 bool AttitudeMFD::ConsumeKeyBuffered(DWORD key)
@@ -928,8 +974,13 @@ bool AttitudeMFD::ProcessKey(DWORD key)
 }
 
 int AttitudeMFD::ButtonMenu (const MFDBUTTONMENU **menu) const
-{
-	return m_attitudeModeController->GetButtonMenu(menu);
+{	
+	if (menu != NULL)
+	{
+		*menu = m_buttonMenu;
+	}
+
+	return m_buttonMenuSize;
 
 	//const int NUM_CMNDS = 22;
 
