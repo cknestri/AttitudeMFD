@@ -334,9 +334,6 @@ void inline AttitudeMFD::UpdateState(double TimeStep)
 	Spacecraft->GetStatus(Status);
 	oapiGetGlobalPos(Spacecraft->GetHandle(), &GSpacecraftPos);
 	oapiGetGlobalVel(Spacecraft->GetHandle(), &GSpacecraftVel);
-	Spacecraft->GetShipAirspeedVector(Airspeed);
-	AOA = Spacecraft->GetAOA();
-	SlipAngle = Spacecraft->GetSlipAngle();
 	Mass = Spacecraft->GetMass();
 
 	m_attitudeModeController->UpdateState();

@@ -102,8 +102,8 @@ private:
 	// Basic state data
 	VESSEL *Spacecraft;
 	VESSELSTATUS Status;
-	VECTOR3 GSpacecraftPos, GSpacecraftVel, Airspeed;
-	double AOA, SlipAngle, Mass, 
+	VECTOR3 GSpacecraftPos, GSpacecraftVel;
+	double Mass, 
 			MaxAttThrust, MaxMainThrust, 
 			MaxRetroThrust, MaxHoverThrust;
 
