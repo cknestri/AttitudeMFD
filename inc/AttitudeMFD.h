@@ -126,12 +126,6 @@ private:
 	void CalcEI();
 	void Control();
 
-	void SetTrimLevelVert();
-	void SetTrimLevelLat();
-	void SetTrimLevelFA();
-	void SetTrimThrustLevel(T_AXIS Axis);
-	void Trim();
-
 	void DisplayVelocity();	
 	void DisplayEI();
 
@@ -140,8 +134,6 @@ private:
 		
 	void ToggleColorMode();
 	void ToggleAttHoldMode();
-	void SetTrimMode(TRIM_MODE Mode);
-	void ToggleTrimStatus();
 	void PrintMFDHeading();
 	void SetRefAttitude();
 	bool SelectBase();

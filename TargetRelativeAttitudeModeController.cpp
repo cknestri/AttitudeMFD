@@ -276,3 +276,157 @@ void TargetRelativeAttitudeModeController::SelectPreviousTarget()
 
 	oapiGetObjectName(m_targetList[m_selectedTargetIndex], m_targetName, sizeof(m_targetName));
 }
+
+//void inline AttitudeMFD::SetTrimMode(TRIM_MODE Mode)
+//{
+//	if (RefMode != TARGET_RELATIVE) {
+//		return;
+//	}
+//
+//	// If we hit the same key a second time, we'll disable the trim mode
+//	if ((TrimStatus == T_ENGAGED) && (TrimMode == Mode)) {
+//		ToggleTrimStatus();
+//		return;
+//	}
+//
+//	ToggleTrimStatus();
+//	TrimMode = Mode;
+//}
+//
+//void AttitudeMFD::ToggleTrimStatus()
+//{
+//	TrimStatus = (TRIM_STATUS)((TrimStatus + 1) % 2);
+//
+//	// Don't leave the thrusters firing!
+//	if (TrimStatus == T_DISENGAGED) {
+//		Spacecraft->SetAttitudeLinLevel(NULL_VECTOR);
+//	}
+//
+//}
+//
+//void inline AttitudeMFD::SetTrimLevelVert()
+//{
+//	double Level = 0.0;
+//
+//	// First, we'll calculate the thrust level assuming that we'll
+//	// be using the linear thruster
+//	Level = -(Mass * RelVel.data[TA_VERT]) / MaxAttThrust;
+//
+//	// We need to decided if we really want to use linear thrusters, or if
+//	// it's better to use one of the engines
+//	if (HaveHoverEngine() && Level > 3.0) {
+//		Level = -(Mass * RelVel.data[TA_VERT]) / MaxHoverThrust;
+//		// NormalizeThrustLevel(Level);
+//		Spacecraft->SetEngineLevel(ENGINE_HOVER, Level);
+//	}
+//	else {
+//		// NormalizeThrustLevel(Level);
+//		Spacecraft->SetAttitudeLinLevel((int)TA_VERT, Level);
+//	}
+//
+//}
+//
+//void inline AttitudeMFD::SetTrimLevelLat()
+//{
+//	double Level = 0.0;
+//
+//	// First, we'll calculate the thrust level assuming that we'll
+//	// be using the linear thruster
+//	Level = -(Mass * RelVel.data[TA_LAT]) / MaxAttThrust;
+//
+//	// NormalizeThrustLevel(Level);
+//	Spacecraft->SetAttitudeLinLevel((int)TA_LAT, Level);
+//
+//}
+//
+//
+//void inline AttitudeMFD::SetTrimLevelFA()
+//{
+//	double Level = 0.0;
+//
+//	// First, we'll calculate the thrust level assuming that we'll
+//	// be using the linear thruster
+//	Level = -(Mass * RelVel.data[TA_FA]) / MaxAttThrust;
+//
+//	if (HaveMainEngine() && Level > 3.0) {
+//		Level = -(Mass * RelVel.data[TA_FA]) / MaxMainThrust;
+//		// NormalizeThrustLevel(Level);
+//		Spacecraft->SetEngineLevel(ENGINE_MAIN, Level);
+//	}
+//	else if (HaveRetroEngine() && Level < -3.0) {
+//		Level = (Mass * RelVel.data[TA_FA]) / MaxRetroThrust;
+//		// NormalizeThrustLevel(Level);
+//		Spacecraft->SetEngineLevel(ENGINE_RETRO, Level);
+//	}
+//	else {
+//		// NormalizeThrustLevel(Level);
+//		Spacecraft->SetAttitudeLinLevel((int)TA_FA, Level);
+//	}
+//}
+//
+//void inline AttitudeMFD::SetTrimThrustLevel(T_AXIS Axis)
+//{
+//	const double DEADBAND = 0.001;
+//
+//	if (fabs(RelVel.data[Axis]) > DEADBAND) {
+//		switch (Axis) {
+//		case TA_VERT:
+//			SetTrimLevelVert();
+//			TrimStatus = T_ENGAGED;
+//			break;
+//		case TA_LAT:
+//			SetTrimLevelLat();
+//			TrimStatus = T_ENGAGED;
+//			break;
+//		case TA_FA:
+//			SetTrimLevelFA();
+//			TrimStatus = T_ENGAGED;
+//			break;
+//		default:
+//			break;
+//		}
+//	}
+//}
+//
+//
+//// This function assumes that trim is engaged
+//void inline AttitudeMFD::Trim()
+//{
+//
+//	// "Clear the board"
+//	Spacecraft->SetAttitudeLinLevel(NULL_VECTOR);
+//
+//	// This will be reset by SetTrimThrustLevel() if trim is used
+//	TrimStatus = T_DISENGAGED;
+//
+//	if (TrimMode == T_VERT ||
+//		TrimMode == T_ALL ||
+//		TrimMode == T_VERT_LAT ||
+//		TrimMode == T_VERT_FA) {
+//
+//		// Clear hover engine thrust
+//		Spacecraft->SetEngineLevel(ENGINE_HOVER, 0.0);
+//
+//		SetTrimThrustLevel(TA_VERT);
+//	}
+//
+//	if (TrimMode == T_LAT ||
+//		TrimMode == T_ALL ||
+//		TrimMode == T_VERT_LAT ||
+//		TrimMode == T_LAT_FA) {
+//		SetTrimThrustLevel(TA_LAT);
+//	}
+//
+//	if (TrimMode == T_FA ||
+//		TrimMode == T_ALL ||
+//		TrimMode == T_LAT_FA ||
+//		TrimMode == T_VERT_FA) {
+//
+//		// Clear main/retro thrust
+//		Spacecraft->SetEngineLevel(ENGINE_MAIN, 0.0);
+//		Spacecraft->SetEngineLevel(ENGINE_RETRO, 0.0);
+//
+//		SetTrimThrustLevel(TA_FA);
+//	}
+//
+//}
