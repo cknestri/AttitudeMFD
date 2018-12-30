@@ -135,9 +135,7 @@ private:
 	void DisplayVelocity();	
 	void DisplayEI();
 
-	void StartModeTargetRelative();
 	void StartModeVelocity();	
-	void StartModeAttitude();
 	void StartModeEI();
 		
 	void ToggleColorMode();

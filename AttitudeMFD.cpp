@@ -107,8 +107,6 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	// Let's prime the pump :-)  We'll just lie about the time
 	UpdateState(1.0);
 
-	StartModeAttitude();
-
 	ColorMode = COLOR_OFF;
 	LINE = h / 28;
 
@@ -241,25 +239,9 @@ void AttitudeMFD::BuildButtonMenu()
 	}
 }
 
-void AttitudeMFD::StartModeTargetRelative()
-{
-
-	TrimStatus = T_DISENGAGED;
-
-	CalcTargetRelative();
-}
-
-
 void AttitudeMFD::StartModeVelocity()
 {
 	CalcVelocity();
-}
-
-void AttitudeMFD::StartModeAttitude()
-{
-	SetRefAttitude();
-
-	CalcAttitude();
 }
 
 void AttitudeMFD::StartModeEI()
