@@ -155,13 +155,13 @@ int TargetRelativeAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** bu
 		{"Prev Target", nullptr, 'P'},
 		//{"Closest Target", nullptr, ' '},
 		//{"Select Base", nullptr, 'B'},
-		//{"Trim Vertical", "(Numpad)", '1'},
-		//{"Trim Lateral", "(Numpad)", '2'},
-		//{"Trim F/A", "(Numpad)", '3'},
-		//{"Trim All", "(Numpad)", '5'},
-		//{"Trim Vert, Lat", "(Numpad)", '7'},
-		//{"Trim Lat, F/A", "(Numpad)", '8'},
-		//{"Trim Vert, F/A", "(Numpad)", '9'}
+		{"Trim Vertical", "(Numpad)", '1'},
+		{"Trim Lateral", "(Numpad)", '2'},
+		{"Trim F/A", "(Numpad)", '3'},
+		{"Trim All", "(Numpad)", '5'},
+		{"Trim Vert, Lat", "(Numpad)", '7'},
+		{"Trim Lat, F/A", "(Numpad)", '8'},
+		{"Trim Vert, F/A", "(Numpad)", '9'}
 	};
 
 	if (buttonMenu != NULL)
@@ -185,33 +185,17 @@ bool TargetRelativeAttitudeModeController::ProcessKey(DWORD key)
 	return false;
 }
 
-//// Trim functions
-	//case OAPI_KEY_NUMPAD5:
-	//	SetTrimMode(T_ALL);
-	//	return true;
-	//case OAPI_KEY_NUMPAD1:
-	//	SetTrimMode(T_VERT);
-	//	return true;
-	//case OAPI_KEY_NUMPAD2:
-	//	SetTrimMode(T_LAT);
-	//	return true;
-	//case OAPI_KEY_NUMPAD3:
-	//	SetTrimMode(T_FA);
-	//	return true;
-	//case OAPI_KEY_NUMPAD7:
-	//	SetTrimMode(T_VERT_LAT);
-	//	return true;
-	//case OAPI_KEY_NUMPAD8:
-	//	SetTrimMode(T_LAT_FA);
-	//	return true;
-	//case OAPI_KEY_NUMPAD9:
-	//	SetTrimMode(T_VERT_FA);
-	//	return true;
-
 void TargetRelativeAttitudeModeController::InitializeCommandMap()
 {
 	m_commandMap[OAPI_KEY_N] = [this]() { SelectNextTarget(); };
 	m_commandMap[OAPI_KEY_P] = [this]() { SelectPreviousTarget(); };
+	m_commandMap[OAPI_KEY_NUMPAD5] = [this]() { m_trimState = TrimState(true, true, true); };
+	m_commandMap[OAPI_KEY_NUMPAD1] = [this]() { m_trimState = TrimState(true, false, false); };
+	m_commandMap[OAPI_KEY_NUMPAD2] = [this]() { m_trimState = TrimState(false, true, false); };
+	m_commandMap[OAPI_KEY_NUMPAD3] = [this]() { m_trimState = TrimState(false, false, true); };
+	m_commandMap[OAPI_KEY_NUMPAD7] = [this]() { m_trimState = TrimState(true, true, false); };
+	m_commandMap[OAPI_KEY_NUMPAD8] = [this]() { m_trimState = TrimState(false, true, true); };
+	m_commandMap[OAPI_KEY_NUMPAD9] = [this]() { m_trimState = TrimState(true, false, true); };
 }
 
 void TargetRelativeAttitudeModeController::BuildTargetList()

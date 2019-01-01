@@ -3,6 +3,7 @@
 #include "IAttitudeModeController.h"
 #include "BaseAttitudeModeController.h"
 #include "IAutopilot.h"
+#include "TrimState.h"
 #include <map>
 #include <vector>
 
@@ -41,6 +42,8 @@ private:
 	VECTOR3 m_relativeVelocity;
 	double m_radialVelocity;
 	VECTOR3 m_pitchYawAngles;
+
+	TrimState m_trimState;
 
 	void InitializeCommandMap();
 	void BuildTargetList();
