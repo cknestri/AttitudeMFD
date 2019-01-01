@@ -55,4 +55,5 @@ private:
 	OBJHANDLE GetSelectedTargetHandle() const;
 	void SelectNextTarget();
 	void SelectPreviousTarget();
+	void SelectClosestTarget();
 };

@@ -41,10 +41,7 @@ TargetRelativeAttitudeModeController::~TargetRelativeAttitudeModeController()
 
 void TargetRelativeAttitudeModeController::Start()
 {
-	BuildTargetList();
-
-	m_selectedTargetIndex = 0;
-	oapiGetObjectName(m_targetList[m_selectedTargetIndex], m_targetName, sizeof(m_targetName));
+	SelectClosestTarget();
 }
 
 /*char Buffer[100];
@@ -167,7 +164,7 @@ int TargetRelativeAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** bu
 	static const MFDBUTTONMENU s_buttonMenu[] = {
 		{"Next Target", nullptr, 'N'},
 		{"Prev Target", nullptr, 'P'},
-		//{"Closest Target", nullptr, ' '},
+		{"Closest Target", nullptr, ' '},
 		{"Trim Vertical", "(Numpad)", '1'},
 		{"Trim Lateral", "(Numpad)", '2'},
 		{"Trim F/A", "(Numpad)", '3'},
@@ -202,6 +199,7 @@ void TargetRelativeAttitudeModeController::InitializeCommandMap()
 {
 	m_commandMap[OAPI_KEY_N] = [this]() { SelectNextTarget(); };
 	m_commandMap[OAPI_KEY_P] = [this]() { SelectPreviousTarget(); };
+	m_commandMap[OAPI_KEY_SPACE] = [this]() { SelectClosestTarget(); };
 	m_commandMap[OAPI_KEY_NUMPAD5] = [this]() { m_trimState = TrimState(true, true, true); };
 	m_commandMap[OAPI_KEY_NUMPAD1] = [this]() { m_trimState = TrimState(true, false, false); };
 	m_commandMap[OAPI_KEY_NUMPAD2] = [this]() { m_trimState = TrimState(false, true, false); };
@@ -314,6 +312,14 @@ void TargetRelativeAttitudeModeController::SelectPreviousTarget()
 		m_selectedTargetIndex--;
 	}
 
+	oapiGetObjectName(m_targetList[m_selectedTargetIndex], m_targetName, sizeof(m_targetName));
+}
+
+void TargetRelativeAttitudeModeController::SelectClosestTarget()
+{
+	BuildTargetList();
+
+	m_selectedTargetIndex = 0;
 	oapiGetObjectName(m_targetList[m_selectedTargetIndex], m_targetName, sizeof(m_targetName));
 }
 
