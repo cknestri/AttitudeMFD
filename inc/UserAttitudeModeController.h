@@ -5,6 +5,7 @@
 #include "CDK.h"
 #include "IAutopilot.h"
 #include "IDisplay.h"
+#include <map>
 
 typedef VECTOR3 Attitude;
 
@@ -37,6 +38,9 @@ private:
 	std::shared_ptr<IAutopilot> m_autopilot;
 	CreateDisplayFunction m_createDisplay;
 
+	std::map<DWORD, std::function<void()>> m_commandMap;
+
+	void InitializeCommandMap();
 	void CalculateAttitude();
 	void SetReferenceAttitude();
 	VECTOR3 CalcPitchYawRollAngles();

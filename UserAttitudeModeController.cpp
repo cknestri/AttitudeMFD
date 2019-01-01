@@ -23,6 +23,7 @@ UserAttitudeModeController::UserAttitudeModeController(
 	, m_relativeAttitude(NULL_VECTOR)
 	, m_isAutopilotEngaged(false)
 {
+	InitializeCommandMap();
 }
 
 UserAttitudeModeController::~UserAttitudeModeController()
@@ -166,14 +167,20 @@ int UserAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** buttonMenu) 
 
 bool UserAttitudeModeController::ProcessKey(DWORD key)
 {
-	switch (key)
+	auto iter = m_commandMap.find(key);
+
+	if (iter != m_commandMap.end())
 	{
-	case OAPI_KEY_PERIOD:
-		SetReferenceAttitude();
+		iter->second();
 		return true;
-	default:
-		return false;
 	}
+
+	return false;
+}
+
+void UserAttitudeModeController::InitializeCommandMap()
+{
+	m_commandMap[OAPI_KEY_PERIOD] = [this]() { SetReferenceAttitude(); };
 }
 
 void UserAttitudeModeController::CalculateAttitude()
