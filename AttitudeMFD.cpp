@@ -462,22 +462,6 @@ void inline AttitudeMFD::CalcEI()
 void AttitudeMFD::Control()
 {
 	m_attitudeModeController->Control();
-	
-	/*if (AttHoldMode == ENGAGED) {
-		
-		if (RefMode == EI && !Interface.InterfaceDefined) {
-			AttHoldMode = DISENGAGED;
-			return;
-		}
-
-		SetAttitude(0, PitchYawRoll.data[PITCH], PITCH, DB_FINE);
-		SetAttitude(0, PitchYawRoll.data[YAW], YAW, DB_FINE);
-		SetAttitude(0, PitchYawRoll.data[ROLL], ROLL, DB_FINE);			
-	}
-
-	if (TrimStatus == T_ENGAGED) {
-		Trim();
-	}*/
 }
 
 
