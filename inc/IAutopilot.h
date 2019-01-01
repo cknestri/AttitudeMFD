@@ -1,6 +1,7 @@
 #pragma once
 #include "CDK.h"
 #include "orbitermath.h"
+#include "TrimState.h"
 
 // The deadband for attitude adjustments.  These are just the "standard" deadband limits - a user
 // can pass any deadband value to SetAttitude().  For example, a 5 degree deadband: 
@@ -27,5 +28,6 @@ public:
 		DEADBAND deadBand,
 		double deltaTime) = 0;
 
+	virtual bool TrimRelativeVelocity(const VECTOR3& relativeVelocity, const TrimState& trimState) = 0;
 	virtual void ShutdownAllEngines() = 0;
 };

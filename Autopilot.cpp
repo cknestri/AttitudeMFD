@@ -57,7 +57,9 @@ Autopilot::Autopilot(VESSEL* spacecraft)
 	m_log << "Thruster Level Pitch,Thruster Level Yaw,Thruster Level Roll" << endl;
 
 	m_spacecraft->GetPMI(m_principleMomentOfInertia);
+	
 	InitializeMaxTorque();
+	InitializeMaxThrust();
 }
 
 Autopilot::~Autopilot()
@@ -95,10 +97,38 @@ double Autopilot::GetThusterTorque(THGROUP_TYPE thrusterGroup, int thrusterIndex
 {
 	THRUSTER_HANDLE thruster = m_spacecraft->GetGroupThruster(thrusterGroup, thrusterIndex);
 
-VECTOR3 thrusterPosition;
-m_spacecraft->GetThrusterRef(thruster, thrusterPosition);
+	VECTOR3 thrusterPosition;
+	m_spacecraft->GetThrusterRef(thruster, thrusterPosition);
 
-return (m_spacecraft->GetThrusterMax(thruster) * Mag(thrusterPosition));
+	return (m_spacecraft->GetThrusterMax(thruster) * Mag(thrusterPosition));
+}
+
+void Autopilot::InitializeMaxThrust()
+{
+	m_maxThrust[VERTICAL] = GetThrusterGroupMaxThrust(THGROUP_ATT_UP);
+	m_maxThrust[LATERAL] = GetThrusterGroupMaxThrust(THGROUP_ATT_LEFT);
+	m_maxThrust[FORE_AFT] = GetThrusterGroupMaxThrust(THGROUP_ATT_FORWARD);
+}
+
+double Autopilot::GetThrusterGroupMaxThrust(THGROUP_TYPE thrusterGroup) const
+{
+	double maxThrust = 0.0;
+
+	int totalThrusters = m_spacecraft->GetGroupThrusterCount(thrusterGroup);
+
+	for (int thrusterIndex = 0; thrusterIndex < totalThrusters; thrusterIndex++)
+	{
+		maxThrust += GetThusterThrust(thrusterGroup, thrusterIndex);
+	}
+
+	return maxThrust;
+}
+
+double Autopilot::GetThusterThrust(THGROUP_TYPE thrusterGroup, int thrusterIndex) const
+{
+	THRUSTER_HANDLE thruster = m_spacecraft->GetGroupThruster(thrusterGroup, thrusterIndex);
+	
+	return m_spacecraft->GetThrusterMax(thruster);
 }
 
 bool Autopilot::SetAttitude(
@@ -183,6 +213,10 @@ void Autopilot::ShutdownAllEngines()
 	ShutdownRotationThrustersInAxis(PITCH);
 	ShutdownRotationThrustersInAxis(YAW);
 	ShutdownRotationThrustersInAxis(ROLL);
+
+	ShutdownTranslationThrustersInAxis(VERTICAL);
+	ShutdownTranslationThrustersInAxis(LATERAL);
+	ShutdownTranslationThrustersInAxis(FORE_AFT);
 }
 
 bool Autopilot::NullRotationRateInAxis(AXIS axis, double deltaTime)
@@ -281,3 +315,91 @@ THGROUP_TYPE Autopilot::GetThrusterGroupForRotationInAxis(AXIS axis, double rota
 	}
 }
 
+bool Autopilot::TrimRelativeVelocity(const VECTOR3& relativeVelocity, const TrimState& trimState)
+{
+	bool isVerticalTrimmed = true;
+	bool isLateralTrimmed = true;
+	bool isForeAftTrimmed = true;
+
+	if (trimState.IsVerticalEnabled())
+	{
+		isVerticalTrimmed = TrimRelativeVelocityInAxis(relativeVelocity.data[VERTICAL], VERTICAL);
+	}
+
+	if (trimState.IsLateralEnabled())
+	{
+		isLateralTrimmed = TrimRelativeVelocityInAxis(relativeVelocity.data[LATERAL], LATERAL);
+	}
+
+	if (trimState.IsForeAftEnabled())
+	{
+		isForeAftTrimmed = TrimRelativeVelocityInAxis(relativeVelocity.data[FORE_AFT], FORE_AFT);
+	}
+
+	return false;
+}
+
+bool Autopilot::TrimRelativeVelocityInAxis(double relativeVelocity, LINEAR_AXIS axis)
+{
+	// Clear the thrusters.  If there are any thruster firings, they will be commanded in this function.
+	ShutdownTranslationThrustersInAxis(axis);
+
+	if (IsRelativeVelocityWithinDeadBand(relativeVelocity))
+	{
+		return true;
+	}
+	
+	double mass = m_spacecraft->GetMass();
+	double thrust = -(mass * relativeVelocity);
+	THGROUP_TYPE thrusterGroup = GetThrusterGroupForTranslationInAxis(axis, thrust);
+	double thrusterLevel = min(fabs(thrust) / m_maxThrust[axis], 1);
+
+	m_spacecraft->SetThrusterGroupLevel(thrusterGroup, thrusterLevel);
+
+	return false;
+}
+
+bool Autopilot::IsRelativeVelocityWithinDeadBand(double relativeVelocity) const
+{
+	const double DEADBAND = 0.01;
+
+	return (fabs(relativeVelocity) < DEADBAND);
+}
+
+THGROUP_TYPE Autopilot::GetThrusterGroupForTranslationInAxis(LINEAR_AXIS axis, double thrust) const
+{
+	bool isPositiveDirection = thrust >= 0;
+
+	switch (axis)
+	{
+	case VERTICAL:
+		return isPositiveDirection ? THGROUP_ATT_UP: THGROUP_ATT_DOWN;
+	case LATERAL:
+		return isPositiveDirection ? THGROUP_ATT_LEFT : THGROUP_ATT_RIGHT;
+	case FORE_AFT:
+		return isPositiveDirection ? THGROUP_ATT_FORWARD : THGROUP_ATT_BACK;
+	default:
+		throw std::runtime_error("Unexpected axis");
+	}
+}
+
+void Autopilot::ShutdownTranslationThrustersInAxis(LINEAR_AXIS axis)
+{
+	switch (axis)
+	{
+	case VERTICAL:
+		m_spacecraft->SetThrusterGroupLevel(THGROUP_ATT_UP, 0);
+		m_spacecraft->SetThrusterGroupLevel(THGROUP_ATT_DOWN, 0);
+		break;
+	case LATERAL:
+		m_spacecraft->SetThrusterGroupLevel(THGROUP_ATT_LEFT, 0);
+		m_spacecraft->SetThrusterGroupLevel(THGROUP_ATT_RIGHT, 0);
+		break;
+	case FORE_AFT:
+		m_spacecraft->SetThrusterGroupLevel(THGROUP_ATT_FORWARD, 0);
+		m_spacecraft->SetThrusterGroupLevel(THGROUP_ATT_BACK, 0);
+		break;
+	default:
+		throw std::runtime_error("Unexpected axis");
+	}
+}

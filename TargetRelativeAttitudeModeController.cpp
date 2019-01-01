@@ -114,6 +114,15 @@ bool TargetRelativeAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 
 	display->PrintAngleAndRate("Pitch:", m_pitchYawAngles.data[PITCH], m_status.vrot.x);
 	display->PrintAngleAndRate("Yaw:", m_pitchYawAngles.data[YAW], m_status.vrot.y);
+	display->PrintNewline();
+
+	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[VERTICAL]);
+	display->DisplayText("Vertical: %s", scaledValueBuffer);
+	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[LATERAL]);
+	display->DisplayText("Lateral: %s", scaledValueBuffer);
+	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[FORE_AFT]);
+	display->DisplayText("Fore/Aft: %s", scaledValueBuffer);
+	display->PrintNewline();
 
 	return true;
 }
@@ -145,6 +154,11 @@ void TargetRelativeAttitudeModeController::Control()
 	if (m_isAutopilotEngaged)
 	{
 		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawAngles, DB_FINE, 1.0);
+	}
+
+	if (m_trimState.IsEnabled())
+	{
+		m_autopilot->TrimRelativeVelocity(m_relativeVelocity, m_trimState);
 	}
 }
 

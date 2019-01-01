@@ -19,6 +19,13 @@ enum AXIS
 	ROLL
 };
 
+enum LINEAR_AXIS
+{
+	VERTICAL,
+	LATERAL,
+	FORE_AFT
+};
+
 #define DimensionOf(array) (sizeof(array)/sizeof(array[0]))
 
 // Prototypes for general functions
