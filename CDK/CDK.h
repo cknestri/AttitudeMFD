@@ -21,8 +21,8 @@ enum AXIS
 
 enum LINEAR_AXIS
 {
-	VERTICAL,
 	LATERAL,
+	VERTICAL,
 	FORE_AFT
 };
 

@@ -23,6 +23,9 @@ struct TelemetryFrame
 	VECTOR3 roationRateDeadBand;
 	VECTOR3 torque;
 	VECTOR3 thrusterLevel;
+	VECTOR3 relativeVelocity;
+	VECTOR3 thrust;
+	VECTOR3 thrusterLevelLinear;
 
 	void Clear()
 	{
@@ -37,7 +40,10 @@ struct TelemetryFrame
 		log << deltaRorationRate.data[PITCH] << "," << deltaRorationRate.data[YAW] << "," << deltaRorationRate.data[ROLL] << ",";
 		log << roationRateDeadBand.data[PITCH] << "," << roationRateDeadBand.data[YAW] << "," << roationRateDeadBand.data[ROLL] << ",";
 		log << torque.data[PITCH] << "," << torque.data[YAW] << "," << torque.data[ROLL] << ",";
-		log << thrusterLevel.data[PITCH] << "," << thrusterLevel.data[YAW] << "," << thrusterLevel.data[ROLL] << endl;
+		log << thrusterLevel.data[PITCH] << "," << thrusterLevel.data[YAW] << "," << thrusterLevel.data[ROLL] << ",";
+		log << relativeVelocity.data[VERTICAL] << "," << relativeVelocity.data[LATERAL] << "," << relativeVelocity.data[FORE_AFT] << ",";
+		log << thrust.data[VERTICAL] << "," << thrust.data[LATERAL] << "," << thrust.data[FORE_AFT] << ",";
+		log << thrusterLevelLinear.data[VERTICAL] << "," << thrusterLevelLinear.data[LATERAL] << "," << thrusterLevelLinear.data[FORE_AFT] << endl;
 	}
 };
 
@@ -54,7 +60,10 @@ Autopilot::Autopilot(VESSEL* spacecraft)
 	m_log << "Delta RotationRate Pitch,Delta RotationRate Yaw,Delta RotationRate Roll,";
 	m_log << "Rotation Rate Deadband Pitch,Rotation Rate Deadband Yaw,Rotation Rate Deadband Roll,";
 	m_log << "Torque Pitch,Torque Yaw,Torque Roll,";
-	m_log << "Thruster Level Pitch,Thruster Level Yaw,Thruster Level Roll" << endl;
+	m_log << "Thruster Level Pitch,Thruster Level Yaw,Thruster Level Roll,";
+	m_log << "Relative Velocity Vertical, Relative Velocity Lateral, Relative Velocity F/A,";
+	m_log << "Thrust Vertical, Thrust Lateral, Thrust Velocity F/A,";
+	m_log << "Thruster Level Vertical, Thruster Level Lateral, Thruster Level F/A,";
 
 	m_spacecraft->GetPMI(m_principleMomentOfInertia);
 	
@@ -317,6 +326,8 @@ THGROUP_TYPE Autopilot::GetThrusterGroupForRotationInAxis(AXIS axis, double rota
 
 bool Autopilot::TrimRelativeVelocity(const VECTOR3& relativeVelocity, const TrimState& trimState)
 {
+	g_telemetryFrame.Clear();
+
 	bool isVerticalTrimmed = true;
 	bool isLateralTrimmed = true;
 	bool isForeAftTrimmed = true;
@@ -336,6 +347,8 @@ bool Autopilot::TrimRelativeVelocity(const VECTOR3& relativeVelocity, const Trim
 		isForeAftTrimmed = TrimRelativeVelocityInAxis(relativeVelocity.data[FORE_AFT], FORE_AFT);
 	}
 
+	g_telemetryFrame.Print(m_log);
+
 	return false;
 }
 
@@ -344,8 +357,13 @@ bool Autopilot::TrimRelativeVelocityInAxis(double relativeVelocity, LINEAR_AXIS 
 	// Clear the thrusters.  If there are any thruster firings, they will be commanded in this function.
 	ShutdownTranslationThrustersInAxis(axis);
 
+	g_telemetryFrame.relativeVelocity.data[axis] = relativeVelocity;
+
 	if (IsRelativeVelocityWithinDeadBand(relativeVelocity))
 	{
+		g_telemetryFrame.thrust.data[axis] = 0;
+		g_telemetryFrame.thrusterLevelLinear.data[axis] = 0;
+
 		return true;
 	}
 	
@@ -355,6 +373,9 @@ bool Autopilot::TrimRelativeVelocityInAxis(double relativeVelocity, LINEAR_AXIS 
 	double thrusterLevel = min(fabs(thrust) / m_maxThrust[axis], 1);
 
 	m_spacecraft->SetThrusterGroupLevel(thrusterGroup, thrusterLevel);
+
+	g_telemetryFrame.thrust.data[axis] = thrust;
+	g_telemetryFrame.thrusterLevelLinear.data[axis] = thrusterLevel;
 
 	return false;
 }
@@ -375,7 +396,7 @@ THGROUP_TYPE Autopilot::GetThrusterGroupForTranslationInAxis(LINEAR_AXIS axis, d
 	case VERTICAL:
 		return isPositiveDirection ? THGROUP_ATT_UP: THGROUP_ATT_DOWN;
 	case LATERAL:
-		return isPositiveDirection ? THGROUP_ATT_LEFT : THGROUP_ATT_RIGHT;
+		return isPositiveDirection ? THGROUP_ATT_RIGHT : THGROUP_ATT_LEFT;
 	case FORE_AFT:
 		return isPositiveDirection ? THGROUP_ATT_FORWARD : THGROUP_ATT_BACK;
 	default:
