@@ -168,7 +168,6 @@ int TargetRelativeAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** bu
 		{"Next Target", nullptr, 'N'},
 		{"Prev Target", nullptr, 'P'},
 		//{"Closest Target", nullptr, ' '},
-		//{"Select Base", nullptr, 'B'},
 		{"Trim Vertical", "(Numpad)", '1'},
 		{"Trim Lateral", "(Numpad)", '2'},
 		{"Trim F/A", "(Numpad)", '3'},
@@ -217,7 +216,7 @@ void TargetRelativeAttitudeModeController::BuildTargetList()
 	unsigned int objectCount = oapiGetObjectCount();
 
 	m_targetList.clear();
-	m_targetList.reserve(objectCount);
+	m_targetList.reserve(objectCount + 1);	// Add 1 in case there is a base
 
 	for (unsigned int objectIndex = 0; objectIndex < objectCount; objectIndex++)
 	{
@@ -227,6 +226,14 @@ void TargetRelativeAttitudeModeController::BuildTargetList()
 		{
 			m_targetList.push_back(target);
 		}
+	}
+
+	VESSELSTATUS status;
+	m_spacecraft->GetStatus(status);
+
+	if (status.base != NULL)
+	{
+		m_targetList.push_back(status.base);
 	}
 
 	std::sort(m_targetList.begin(), m_targetList.end(), [this](const OBJHANDLE object1, const OBJHANDLE object2)
