@@ -32,6 +32,7 @@ TargetRelativeAttitudeModeController::TargetRelativeAttitudeModeController(
 	, m_radialVelocity(0.0)
 	, m_pitchYawAngles(NULL_VECTOR)
 {
+	InitializeCommandMap();
 }
 
 TargetRelativeAttitudeModeController::~TargetRelativeAttitudeModeController()
@@ -173,17 +174,15 @@ int TargetRelativeAttitudeModeController::GetButtonMenu(const MFDBUTTONMENU** bu
 
 bool TargetRelativeAttitudeModeController::ProcessKey(DWORD key)
 {
-	switch (key)
+	auto iter = m_commandMap.find(key);
+
+	if (iter != m_commandMap.end())
 	{
-	case OAPI_KEY_N:
-		SelectNextTarget();
+		iter->second();
 		return true;
-	case OAPI_KEY_P:
-		SelectPreviousTarget();
-		return true;
-	default:
-		return false;
 	}
+
+	return false;
 }
 
 //// Trim functions
@@ -208,6 +207,12 @@ bool TargetRelativeAttitudeModeController::ProcessKey(DWORD key)
 	//case OAPI_KEY_NUMPAD9:
 	//	SetTrimMode(T_VERT_FA);
 	//	return true;
+
+void TargetRelativeAttitudeModeController::InitializeCommandMap()
+{
+	m_commandMap[OAPI_KEY_N] = [this]() { SelectNextTarget(); };
+	m_commandMap[OAPI_KEY_P] = [this]() { SelectPreviousTarget(); };
+}
 
 void TargetRelativeAttitudeModeController::BuildTargetList()
 {

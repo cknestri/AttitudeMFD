@@ -3,6 +3,7 @@
 #include "IAttitudeModeController.h"
 #include "BaseAttitudeModeController.h"
 #include "IAutopilot.h"
+#include <map>
 #include <vector>
 
 class TargetRelativeAttitudeModeController : public IAttitudeModeController
@@ -30,6 +31,8 @@ private:
 	std::shared_ptr<IAutopilot> m_autopilot;
 	CreateDisplayFunction m_createDisplay;
 
+	std::map<DWORD, std::function<void()>> m_commandMap;
+
 	unsigned int m_selectedTargetIndex;
 	std::vector<OBJHANDLE> m_targetList;
 	char m_targetName[100];
@@ -39,6 +42,7 @@ private:
 	double m_radialVelocity;
 	VECTOR3 m_pitchYawAngles;
 
+	void InitializeCommandMap();
 	void BuildTargetList();
 	double GetRelativeDistanceToObject(const OBJHANDLE objectHandle) const;
 	void SetRelativePositionToSelectedTarget();
