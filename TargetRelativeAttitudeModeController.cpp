@@ -22,9 +22,7 @@ TargetRelativeAttitudeModeController::TargetRelativeAttitudeModeController(
 	VESSEL* spacecraft,
 	const shared_ptr<IAutopilot>& autopilot,
 	const CreateDisplayFunction& createDisplay)
-	: m_spacecraft(spacecraft)
-	, m_autopilot(autopilot)
-	, m_createDisplay(createDisplay)
+	: BaseAttitudeModeControl(spacecraft, autopilot, createDisplay)
 	, m_isAutopilotEngaged(false)
 	, m_selectedTargetIndex(0)
 	, m_relativePosition(NULL_VECTOR)

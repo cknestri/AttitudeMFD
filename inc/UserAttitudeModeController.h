@@ -3,13 +3,11 @@
 #include "IAttitudeModeController.h"
 #include "BaseAttitudeModeController.h"
 #include "CDK.h"
-#include "IAutopilot.h"
-#include "IDisplay.h"
 #include <map>
 
 typedef VECTOR3 Attitude;
 
-class UserAttitudeModeController : public IAttitudeModeController
+class UserAttitudeModeController : public IAttitudeModeController, public BaseAttitudeModeControl
 {
 public:
 	UserAttitudeModeController(
@@ -28,15 +26,12 @@ public:
 	bool ProcessKey(DWORD key);
 
 private:
-	VESSEL* m_spacecraft;
 	VESSELSTATUS m_status;
 	VECTOR3 m_globalSpacecraftPosition;
 	VECTOR3 m_pitchYawRollAngles;
 	Attitude m_referenceAttitude;
 	Attitude m_relativeAttitude;
 	bool m_isAutopilotEngaged;
-	std::shared_ptr<IAutopilot> m_autopilot;
-	CreateDisplayFunction m_createDisplay;
 
 	std::map<DWORD, std::function<void()>> m_commandMap;
 

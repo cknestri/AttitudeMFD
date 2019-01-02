@@ -2,12 +2,11 @@
 
 #include "IAttitudeModeController.h"
 #include "BaseAttitudeModeController.h"
-#include "IAutopilot.h"
 #include "TrimState.h"
 #include <map>
 #include <vector>
 
-class TargetRelativeAttitudeModeController : public IAttitudeModeController
+class TargetRelativeAttitudeModeController : public IAttitudeModeController, public BaseAttitudeModeControl
 {
 public:
 	TargetRelativeAttitudeModeController(
@@ -26,12 +25,9 @@ public:
 	bool ProcessKey(DWORD key);
 
 private:
-	VESSEL* m_spacecraft;
 	VESSELSTATUS m_status;
 	bool m_isAutopilotEngaged;
-	std::shared_ptr<IAutopilot> m_autopilot;
-	CreateDisplayFunction m_createDisplay;
-
+	
 	std::map<DWORD, std::function<void()>> m_commandMap;
 
 	unsigned int m_selectedTargetIndex;

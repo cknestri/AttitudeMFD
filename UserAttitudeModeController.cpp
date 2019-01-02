@@ -14,9 +14,7 @@ UserAttitudeModeController::UserAttitudeModeController(
 	VESSEL* spacecraft,
 	const shared_ptr<IAutopilot>& autopilot,
 	const CreateDisplayFunction& createDisplay)
-	: m_spacecraft(spacecraft)
-	, m_autopilot(autopilot)
-	, m_createDisplay(createDisplay)
+	: BaseAttitudeModeControl(spacecraft, autopilot, createDisplay)
 	, m_globalSpacecraftPosition(NULL_VECTOR)
 	, m_pitchYawRollAngles(NULL_VECTOR)
 	, m_referenceAttitude(NULL_VECTOR)
