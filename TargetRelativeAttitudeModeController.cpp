@@ -68,10 +68,10 @@ bool TargetRelativeAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	char scaledValueBuffer[100];
 	
 	ScaleOutput(scaledValueBuffer, Mag(m_relativePosition));
-	display->DisplayText("Distance: %s", scaledValueBuffer);
+	display->DisplayText("Distance:           %s", scaledValueBuffer);
 
 	ScaleOutput(scaledValueBuffer, m_radialVelocity);
-	display->DisplayText("Radial Velocity: %s", scaledValueBuffer);
+	display->DisplayText("Radial Velocity:    %s", scaledValueBuffer);
 	display->PrintNewline();
 
 	display->PrintAngleAndRate("Pitch:", m_pitchYawAngles.data[PITCH], m_status.vrot.x);
@@ -79,11 +79,11 @@ bool TargetRelativeAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	display->PrintNewline();
 
 	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[VERTICAL]);
-	display->DisplayText("Vertical: %s", scaledValueBuffer);
+	display->DisplayText("Vertical:           %s", scaledValueBuffer);
 	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[LATERAL]);
-	display->DisplayText("Lateral: %s", scaledValueBuffer);
+	display->DisplayText("Lateral:            %s", scaledValueBuffer);
 	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[FORE_AFT]);
-	display->DisplayText("Fore/Aft: %s", scaledValueBuffer);
+	display->DisplayText("Fore/Aft:           %s", scaledValueBuffer);
 	display->PrintNewline();
 
 	return true;
