@@ -84,6 +84,8 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	, m_attitudeModeController(nullptr)
 	, m_buttonMenu(nullptr)
 	, m_buttonMenuSize(0)
+	, Width(w)
+	, Height(h)
 {
 	// First, for the callback
 	if (!g_AttitudeMFD.CurrentMFD1) {
@@ -109,10 +111,6 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 
 	ColorMode = COLOR_OFF;
 	LINE = h / 28;
-
-	// Store the width and height
-	Width = w;
-	Height = h;
 
 	// Set the brush for the thruster display
 	ThrusterBrush = CreateSolidBrush(RGB(0, 200, 0));
