@@ -6,6 +6,7 @@
 #include <functional>
 #include <memory>
 
+typedef VECTOR3 Attitude;
 typedef std::function<std::shared_ptr<IDisplay>(oapi::Sketchpad* sketchpad)> CreateDisplayFunction;
 
 class BaseAttitudeModeControl

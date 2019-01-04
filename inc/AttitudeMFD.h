@@ -126,7 +126,6 @@ private:
 	void CalcEI();
 	void Control();
 
-	void DisplayVelocity();	
 	void DisplayEI();
 
 	void StartModeVelocity();	

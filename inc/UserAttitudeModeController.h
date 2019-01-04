@@ -5,8 +5,6 @@
 #include "CDK.h"
 #include <map>
 
-typedef VECTOR3 Attitude;
-
 class UserAttitudeModeController : public IAttitudeModeController, public BaseAttitudeModeControl
 {
 public:

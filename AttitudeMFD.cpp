@@ -468,36 +468,6 @@ bool AttitudeMFD::Update(oapi::Sketchpad* sketchpad)
 	return m_attitudeModeController->Update(sketchpad);
 }
 
-
-void AttitudeMFD::DisplayVelocity()
-{
-	char Buffer[100];
-
-	PrintRefMode();
-	
-	// Print velocity
-	TextOut(hDC, 5, CurrentLine, "Velocity:", 9);	
-	ScaleOutput(Buffer, Mag(Status.rvel));
-
-	TextOut(hDC, 100, CurrentLine, Buffer, strlen(Buffer));
-	CurrentLine += 2 * LINE;
-
-	PrintAngle("Set Pitch", RelAttitude.data[PITCH]);
-	PrintAngle("Set Yaw ", RelAttitude.data[YAW]);
-	PrintAngle("Set Roll", RelAttitude.data[ROLL]);
-	CurrentLine += 2 * LINE;
-
-
-	PrintAngleRate("Pitch:", PitchYawRoll.data[PITCH], Status.vrot.x);
-	PrintAngleRate("Yaw:", PitchYawRoll.data[YAW], Status.vrot.y);
-	PrintAngleRate("Roll:", PitchYawRoll.data[ROLL], Status.vrot.z);
-
-	CurrentLine += 2 * LINE;
-
-	PrintRotThrust();
-
-}
-
 void AttitudeMFD::DisplayEI()
 {
 	char Buffer[100];

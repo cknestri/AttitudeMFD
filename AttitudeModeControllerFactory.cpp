@@ -25,7 +25,7 @@ IAttitudeModeController* GetAttitudeModeController(
 	case USER_ATT: 
 		return new UserAttitudeModeController(spacecraft, autopilot, createDisplay);
 	case VELOCITY:
-		return new VelocityAttitudeModeController(spacecraft, displayWidth, displayHeight);
+		return new VelocityAttitudeModeController(spacecraft, autopilot, createDisplay);
 	case TARGET_RELATIVE:
 		return new TargetRelativeAttitudeModeController(spacecraft, autopilot, createDisplay);
 	case EI:
