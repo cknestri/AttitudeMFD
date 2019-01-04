@@ -29,7 +29,7 @@ IAttitudeModeController* GetAttitudeModeController(
 	case TARGET_RELATIVE:
 		return new TargetRelativeAttitudeModeController(spacecraft, autopilot, createDisplay);
 	case EI:
-		return new EntryInterfaceAttitudeModeController(spacecraft, displayWidth, displayHeight);
+		return new EntryInterfaceAttitudeModeController(spacecraft, autopilot, createDisplay);
 	default:
 		throw std::runtime_error("Unrecognized mode");
 	}

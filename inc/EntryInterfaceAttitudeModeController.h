@@ -1,14 +1,17 @@
 #pragma once
 
 #include "IAttitudeModeController.h"
+#include "BaseAttitudeModeController.h"
+#include <map>
+#include <memory>
 
-class EntryInterfaceAttitudeModeController : public IAttitudeModeController
+class EntryInterfaceAttitudeModeController : public IAttitudeModeController, public BaseAttitudeModeControl
 {
 public:
 	EntryInterfaceAttitudeModeController(
 		VESSEL* spacecraft,
-		DWORD displayWidth,
-		DWORD displayHeight);
+		const std::shared_ptr<IAutopilot>& autopilot,
+		const CreateDisplayFunction& createDisplay);
 	virtual ~EntryInterfaceAttitudeModeController();
 
 	void Start() override;
@@ -21,7 +24,14 @@ public:
 	bool ProcessKey(DWORD key);
 
 private:
-	VESSEL* m_spacecraft;
-	DWORD m_displayWidth;
-	DWORD m_displayHeight;
+	VESSELSTATUS m_status;
+	VECTOR3 m_globalSpacecraftPosition;
+	Attitude m_referenceAttitude;
+	Attitude m_relativeAttitude;
+	VECTOR3 m_pitchYawRollAngles;
+	bool m_isAutopilotEngaged;
+
+	std::map<DWORD, std::function<void()>> m_commandMap;
+
+	void InitializeCommandMap();
 };

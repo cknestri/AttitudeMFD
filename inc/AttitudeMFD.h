@@ -123,13 +123,9 @@ private:
 	void CalcTargetRelative();
 	void CalcVelocity();	
 	void CalcAttitude();
-	void CalcEI();
 	void Control();
 
-	void DisplayEI();
-
 	void StartModeVelocity();	
-	void StartModeEI();
 		
 	void ToggleColorMode();
 	void ToggleAttHoldMode();
