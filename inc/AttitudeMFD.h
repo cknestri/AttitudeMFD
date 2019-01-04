@@ -8,7 +8,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AUTOPILOT_MFD_H
 #define AUTOPILOT_MFD_H
-#include "List.h"
 #include "CDK.h"
 #include "IAttitudeModeController.h"
 #include <functional>
