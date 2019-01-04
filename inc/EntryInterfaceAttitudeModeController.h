@@ -33,5 +33,9 @@ private:
 
 	std::map<DWORD, std::function<void()>> m_commandMap;
 
+	ENTRY_INTERFACE m_entryInterface;
+
 	void InitializeCommandMap();
+	VECTOR3 CalcPitchYawRollAngles();
+	VECTOR3 GetPYR(VECTOR3 Pitch, VECTOR3 YawRoll);
 };
