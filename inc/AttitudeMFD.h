@@ -28,7 +28,6 @@ enum ATT_HOLD_MODE {DISENGAGED, ENGAGED};
 enum COLOR_MODE {COLOR_OFF, COLOR_WHITE, COLOR_RED};
 
 enum TRIM_STATUS {T_ENGAGED, T_DISENGAGED};
-enum T_AXIS {TA_LAT, TA_VERT, TA_FA};
 
 
 // Trim modes:
@@ -43,7 +42,6 @@ enum TRIM_MODE {T_VERT, T_LAT, T_FA, T_ALL, T_VERT_LAT, T_LAT_FA, T_VERT_FA};
 
 //const int LINE = 15;					// Number of pixels to jump to write the next line
 const int NUM_CONTROL_MODES = 3;
-const int MAX_TARGET_NAME = 50;
 const double UPDATE_INTERVAL = 1.0;		// How much time should pass between updates
 
 
@@ -69,46 +67,17 @@ private:
 
 	MFDBUTTONMENU* m_buttonMenu;
 	int m_buttonMenuSize;
-
-	// MFD Display-related variables
-	HDC hDC;	
 	DWORD Width, Height;
-	int LINE;				// Number of pixels to jump to write the next line
-	int CurrentLine;
 	
 	
 	// Common variables
 	REF_MODE RefMode;
-	Attitude RefAttitude;
-	Attitude RelAttitude;
-	VECTOR3 PitchYawRoll;
-	VECTOR3 RotLevel;
 	ATT_HOLD_MODE AttHoldMode;
-
-	
-	// For TARGET_RELATIVE reference mode
-	OBJHANDLE TargetRef;
-	char TargetName[MAX_TARGET_NAME];
-	int Index;
-	double RadialVel;
-	VECTOR3 RelPos, RelVel;
-	TRIM_STATUS TrimStatus;
-	TRIM_MODE TrimMode;
-
-	// For EI reference mode
-	ENTRY_INTERFACE Interface;
 
 
 	// Basic state data
 	VESSEL *Spacecraft;
-	VESSELSTATUS Status;
-	VECTOR3 GSpacecraftPos, GSpacecraftVel;
-	double Mass, 
-			MaxAttThrust, MaxMainThrust, 
-			MaxRetroThrust, MaxHoverThrust;
 
-	// Misc variables
-	HBRUSH ThrusterBrush, ThrusterBrushNeg;
 	COLOR_MODE ColorMode;
 	double TimeElapsed;
 
@@ -117,35 +86,10 @@ private:
 	void InitializeCommandMap();
 	void BuildButtonMenu();
 	bool ProcessKey(DWORD key);
-
-	VECTOR3 CalcPitchYawRollAngles();
-
-	void CalcTargetRelative();
-	void CalcVelocity();	
-	void CalcAttitude();
 	void Control();
-
-	void StartModeVelocity();	
-		
+	
 	void ToggleColorMode();
 	void ToggleAttHoldMode();
-	void PrintMFDHeading();
-	void SetRefAttitude();
-	bool SelectBase();
-	void PrintRefMode();
-	void PrintAngleRate(const char *Heading, double Angle, double Rate);
-	void PrintAngle(const char *Heading, double Angle);
-	void PrintRate(const char *Heading, double Rate);
-	void PrintRate(const char *Heading, double Rate, bool Trim);
-	void PrintPitchThrustLevel(double Level);
-	void PrintYawThrustLevel(double Level);
-	void PrintRollThrustLevel(double Level);
-	void PrintRotThrust();
-	void PrintRelVel();
-
-	bool HaveMainEngine();
-	bool HaveRetroEngine();
-	bool HaveHoverEngine();
 
 	void SaveStatus();
 	void LoadSavedStatus();

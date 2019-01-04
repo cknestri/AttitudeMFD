@@ -31,16 +31,6 @@ static struct {
 		REF_MODE RefMode;
 		ATT_HOLD_MODE AttHoldMode;
 
-		// For reference modes OTHER than TARGET_RELATIVE
-		Attitude RefAttitude;
-		Attitude RelAttitude;
-
-		// For TARGET_RELATIVE reference mode
-		OBJHANDLE TargetRef;		
-		int Index;
-		char TargetName[MAX_TARGET_NAME];	
-		TRIM_STATUS TrimStatus;
-		TRIM_MODE TrimMode;
 
 		COLOR_MODE ColorMode;
 	} SavedStatus;
@@ -96,7 +86,6 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 
 	TimeElapsed = 0.0;
 	
-	RelAttitude = NULL_VECTOR;
 	AttHoldMode = DISENGAGED;
 	
 	InitializeCommandMap();
@@ -110,14 +99,6 @@ AttitudeMFD::AttitudeMFD (DWORD w, DWORD h, VESSEL *vessel)
 	UpdateState(1.0);
 
 	ColorMode = COLOR_OFF;
-	LINE = h / 28;
-
-	// Set the brush for the thruster display
-	ThrusterBrush = CreateSolidBrush(RGB(0, 200, 0));
-	ThrusterBrushNeg = CreateSolidBrush(RGB(100, 100, 100));
-
-	// For sanity
-	CurrentLine = 0;
 
 	// This is a little redundant, since we took the time to write the initial values
 	if (g_AttitudeMFD.SavedStatus.ValidStatus) {
@@ -146,17 +127,6 @@ void AttitudeMFD::SaveStatus()
 
 	g_AttitudeMFD.SavedStatus.RefMode = RefMode;
 	g_AttitudeMFD.SavedStatus.AttHoldMode = AttHoldMode;
-
-	if (RefMode == TARGET_RELATIVE) {
-		g_AttitudeMFD.SavedStatus.TargetRef = TargetRef;		
-		g_AttitudeMFD.SavedStatus.Index = Index;
-		strcpy(g_AttitudeMFD.SavedStatus.TargetName, TargetName);
-		g_AttitudeMFD.SavedStatus.TrimStatus = TrimStatus;
-		g_AttitudeMFD.SavedStatus.TrimMode = TrimMode;
-	} else {
-		g_AttitudeMFD.SavedStatus.RefAttitude = RefAttitude;		
-		g_AttitudeMFD.SavedStatus.RelAttitude = RelAttitude;		
-	}
 	
 	g_AttitudeMFD.SavedStatus.ColorMode = ColorMode;
 
@@ -166,17 +136,6 @@ void AttitudeMFD::LoadSavedStatus()
 {
 	RefMode = g_AttitudeMFD.SavedStatus.RefMode;
 	AttHoldMode = g_AttitudeMFD.SavedStatus.AttHoldMode;
-
-	if (RefMode == TARGET_RELATIVE) {
-		TargetRef = g_AttitudeMFD.SavedStatus.TargetRef;		
-		Index = g_AttitudeMFD.SavedStatus.Index;
-		strcpy(TargetName, g_AttitudeMFD.SavedStatus.TargetName);
-		TrimStatus = g_AttitudeMFD.SavedStatus.TrimStatus;
-		TrimMode = g_AttitudeMFD.SavedStatus.TrimMode;
-	} else {
-		RefAttitude = g_AttitudeMFD.SavedStatus.RefAttitude;		
-		RelAttitude = g_AttitudeMFD.SavedStatus.RelAttitude;		
-	}
 	
 	ColorMode = g_AttitudeMFD.SavedStatus.ColorMode;
 	
@@ -237,17 +196,6 @@ void AttitudeMFD::BuildButtonMenu()
 	}
 }
 
-void AttitudeMFD::StartModeVelocity()
-{
-	CalcVelocity();
-}
-
-void AttitudeMFD::SetRefAttitude()
-{	
-	// Set the current attitude as the reference attitude
-	RefAttitude = Status.arot;
-}
-
 void AttitudeMFD::ToggleColorMode()
 {
 	ColorMode = (COLOR_MODE)((ColorMode + 1) % 3);
@@ -272,16 +220,6 @@ void AttitudeMFD::ToggleAttHoldMode()
 // Update spacecraft state data to be used
 void inline AttitudeMFD::UpdateState(double TimeStep)
 {
-	// This allows the thruster information to be updated at a higher rate than the other
-	// information
-	RotLevel.data[PITCH] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_PITCHUP) - 
-							Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_PITCHDOWN);
-	RotLevel.data[YAW] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_YAWRIGHT) - 
-							Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_YAWLEFT);
-
-	RotLevel.data[ROLL] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_BANKRIGHT) - 
-							Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_BANKLEFT);
-
 	if (TimeStep < 1) {
 		InvalidateDisplay();
 	}
@@ -295,142 +233,12 @@ void inline AttitudeMFD::UpdateState(double TimeStep)
 		return;
 	}
 
-	Spacecraft->GetStatus(Status);
-	oapiGetGlobalPos(Spacecraft->GetHandle(), &GSpacecraftPos);
-	oapiGetGlobalVel(Spacecraft->GetHandle(), &GSpacecraftVel);
-	Mass = Spacecraft->GetMass();
-
 	m_attitudeModeController->UpdateState();
 
 	Control();
 
 	// Reset time
 	TimeElapsed = 0.0;
-
-	VECTOR3 thrustGroupLevel;
-	thrustGroupLevel.data[PITCH] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_PITCHUP);
-	thrustGroupLevel.data[YAW] = Spacecraft->GetThrusterGroupLevel(THGROUP_ATT_PITCHDOWN);
-	thrustGroupLevel.data[ROLL] = 0;
-
-	PrintAngleVector(thrustGroupLevel);
-}
-
-VECTOR3 GetPYR(VECTOR3 Pitch, VECTOR3 YawRoll)
-{	
-	VECTOR3 Res = { 0, 0, 0 };
-
-	// Normalize the vectors
-	Pitch = Normalize(Pitch);
-	YawRoll = Normalize(YawRoll);
-	VECTOR3 H = Normalize(CrossProduct(Pitch, YawRoll));
-
-	Res.data[YAW] = -asin(YawRoll.z);
-
-	Res.data[ROLL] = atan2(YawRoll.y, YawRoll.x);
-
-	Res.data[PITCH] = atan2(H.z, Pitch.z);
-
-	return Res;
-
-}
-
-
-// This is the same as the previous function, except that we use the transpose matrix
-VECTOR3 GetPYR2(VECTOR3 Pitch, VECTOR3 YawRoll)
-{	
-	VECTOR3 Res = { 0, 0, 0 };
-
-	// Normalize the vectors
-	Pitch = Normalize(Pitch);
-	YawRoll = Normalize(YawRoll);
-	VECTOR3 H = Normalize(CrossProduct(Pitch, YawRoll));
-
-	Res.data[YAW] = -asin(Pitch.x);
-
-	Res.data[ROLL] = atan2(H.x, YawRoll.x);
-
-	Res.data[PITCH] = atan2(Pitch.y, Pitch.z);
-
-
-	return Res;
-
-}
-
-
-VECTOR3 GetPY(VECTOR3 PitchYaw)
-{	
-	VECTOR3 Res = { 0, 0, 0 };
-
-	Res = GetPitchYawRoll(PitchYaw, NULL_VECTOR);
-
-	// Change the signs to make it consistent
-	Res.data[PITCH] = -Res.data[PITCH];
-
-	return Res;
-
-}
-
-
-
-// Returns a vector containing the pitch, yaw, and roll angles based upon the desired attitude
-// relative to the current reference attitude
-VECTOR3 inline AttitudeMFD::CalcPitchYawRollAngles()
-{
-	RefPoints GlobalPts, LocalPts;
-	VECTOR3 PitchUnit = {0, 0, 1.0}, YawRollUnit = {1.0, 0, 0};
-
-	RotateVector(PitchUnit, RelAttitude, PitchUnit);
-	RotateVector(YawRollUnit, RelAttitude, YawRollUnit);
-
-	RotateVector(PitchUnit, RefAttitude, GlobalPts.Pitch);
-	RotateVector(YawRollUnit, RefAttitude, GlobalPts.Yaw);
-
-	GlobalPts.Pitch = GSpacecraftPos + GlobalPts.Pitch;
-	GlobalPts.Yaw = GSpacecraftPos + GlobalPts.Yaw;	
-
-	Spacecraft->Global2Local(GlobalPts.Pitch, LocalPts.Pitch);
-	Spacecraft->Global2Local(GlobalPts.Yaw, LocalPts.Yaw);
-
-	return GetPYR(LocalPts.Pitch, LocalPts.Yaw);
-}
-
-void inline AttitudeMFD::CalcTargetRelative()
-{
-	VECTOR3 SpacecraftPos, TargetPos, GTargetPos, GVel;
-
-	oapiGetGlobalPos(TargetRef, &GTargetPos);
-	Spacecraft->Global2Local(GSpacecraftPos, SpacecraftPos);
-	Spacecraft->Global2Local(GTargetPos, TargetPos);
-	RelPos = TargetPos - SpacecraftPos; 
-
-	PitchYawRoll = GetPY(RelPos);
-
-	// Calculate relative velocity
-	Spacecraft->GetRelativeVel(TargetRef, GVel);
-	Spacecraft->Global2Local((GVel + GSpacecraftPos), RelVel);
-
-	// Compute the radial component
-	RadialVel = (RelPos * RelVel) / Mag(RelPos);
-
-
-}
-void inline AttitudeMFD::CalcAttitude()
-{
-
-	PitchYawRoll = CalcPitchYawRollAngles();
-
-}
-
-void inline AttitudeMFD::CalcVelocity()
-{
-	VECTOR3 H;
-
-	H = CrossProduct(Status.rpos, Status.rvel);
-
-	RefAttitude = GetPYR2(Status.rvel, H);
-
-	PitchYawRoll = CalcPitchYawRollAngles();
-	
 }
 
 
@@ -578,241 +386,6 @@ int AttitudeMFD::ButtonMenu (const MFDBUTTONMENU **menu) const
 }
 
 
-bool AttitudeMFD::SelectBase()
-{
-	VESSELSTATUS Status;
-
-	oapiGetFocusInterface()->GetStatus(Status);
-
-	if (Status.base) {
-		TargetRef = Status.base;
-		oapiGetObjectName(TargetRef, TargetName, 20);
-
-		Index = 0;
-
-		return true;
-	}
-
-	return false;
-}
-
-void inline AttitudeMFD::PrintMFDHeading()
-{
-	char Buffer[100];
-
-	SetTextColor(hDC, RGB(255, 255, 255));
-	sprintf(Buffer, "Attitude MFD");
-	TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
-	SetTextColor(hDC, RGB(0, 255, 0));
-
-	CurrentLine += LINE;
-}
-
-void AttitudeMFD::PrintRefMode()
-{
-	char Buffer[100], Buffer2[10];
-		
-	sprintf(Buffer, "Ref Mode:");
-	TextOut(hDC, 5, CurrentLine, Buffer, strlen(Buffer));
-	
-	switch (RefMode) {
-	case USER_ATT:
-		sprintf(Buffer, "Attitude");	
-		break;
-	case VELOCITY:
-		sprintf(Buffer, "%s", "Velocity");
-		break;
-	case TARGET_RELATIVE:
-		sprintf(Buffer, "%s", "Target Relative");
-		break;
-	case EI:
-		sprintf(Buffer, "%s", "Entry Interface");
-		break;
-	};
-	
-
-	if (AttHoldMode == ENGAGED) {
-		sprintf(Buffer2, "%s", " (Hold)");
-		strcat(Buffer, Buffer2);
-	}
-
-	SetTextColor(hDC, RGB(255, 255, 255));
-	TextOut(hDC, 90, CurrentLine, Buffer, strlen(Buffer));
-	SetTextColor(hDC, RGB(0, 255, 0));
-
-	CurrentLine += LINE;
-}
-
-void AttitudeMFD::PrintAngleRate(const char *Heading, double Angle, double Rate)
-{
-	const int TAB = 100;
-	char Buffer[10];	
-
-	TextOut(hDC, 5, CurrentLine, Heading, strlen(Heading));
-	
-	sprintf(Buffer, "%.2f", Angle);
-
-	// Adjust for negative number
-	if (Angle < 0) {
-		if (ColorMode == COLOR_WHITE) {
-			sprintf(Buffer, "%.2f", DEG * Angle);
-			SetTextColor(hDC, RGB(255, 255, 255));
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else if (ColorMode == COLOR_RED) {
-			sprintf(Buffer, "%.2f", DEG * Angle);
-			SetTextColor(hDC, RGB(255, 0, 0));
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else {
-			sprintf(Buffer, "%.2f", DEG * Angle);
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-		} 
-	} else {
-		sprintf(Buffer, "+%.2f", DEG * Angle);
-		TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-	}
-
-	// Adjust for negative number
-	if (Rate < 0) {
-		if (ColorMode == COLOR_WHITE) {
-			sprintf(Buffer, "%.2f", DEG * Rate);
-			SetTextColor(hDC, RGB(255, 255, 255));
-			TextOut(hDC, 2 * TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else if (ColorMode == COLOR_RED) {
-			sprintf(Buffer, "%.2f", DEG * Rate);
-			SetTextColor(hDC, RGB(255, 0, 0));
-			TextOut(hDC, 2 * TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else {
-			sprintf(Buffer, "%.2f", DEG * Rate);
-			TextOut(hDC, 2 * TAB, CurrentLine, Buffer, strlen(Buffer));
-		} 
-	} else {
-		sprintf(Buffer, "+%.2f", DEG * Rate);
-		TextOut(hDC, 2 * TAB, CurrentLine, Buffer, strlen(Buffer));
-	}
-
-	CurrentLine += LINE;
-}
-
-void AttitudeMFD::PrintAngle(const char *Heading, double Angle)
-{
-	const int TAB = 100;
-	char Buffer[10];	
-
-	TextOut(hDC, 5, CurrentLine, Heading, strlen(Heading));
-	
-	sprintf(Buffer, "%.2f", Angle);
-
-	// Adjust for negative number
-	if (Angle < 0) {
-		if (ColorMode == COLOR_WHITE) {
-			sprintf(Buffer, "%.2f", DEG * Angle);
-			SetTextColor(hDC, RGB(255, 255, 255));
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else if (ColorMode == COLOR_RED) {
-			sprintf(Buffer, "%.2f", DEG * Angle);
-			SetTextColor(hDC, RGB(255, 0, 0));
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else {
-			sprintf(Buffer, "%.2f", DEG * Angle);
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-		} 
-	} else {
-		sprintf(Buffer, "+%.2f", DEG * Angle);
-		TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-	}
-
-	CurrentLine += LINE;
-}
-
-void AttitudeMFD::PrintRate(const char *Heading, double Rate)
-{
-	const int TAB = 100;
-	char Buffer[25];
-
-	TextOut(hDC, 5, CurrentLine, Heading, strlen(Heading));
-	
-	ScaleOutput(Buffer, Rate);
-
-	// Adjust for negative number
-	if (Rate < 0) {
-		ScaleOutput(Buffer, Rate);
-
-		if (ColorMode == COLOR_WHITE) {
-			//sprintf(Buffer, "%.2f", DEG * Rate);
-			SetTextColor(hDC, RGB(255, 255, 255));
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else if (ColorMode == COLOR_RED) {
-			//sprintf(Buffer, "%.2f", DEG * Rate);
-			SetTextColor(hDC, RGB(255, 0, 0));
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else {
-			//sprintf(Buffer, "%.2f", DEG * Rate);
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-		} 
-	} else {
-		// Add + sign
-		Buffer[0] = '+';
-		ScaleOutput(&Buffer[1], Rate);
-		TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-	}
-
-	CurrentLine += LINE;
-}
-
-
-
-void AttitudeMFD::PrintRate(const char *Heading, double Rate, bool Trim)
-{
-	const int TAB = 100;
-	char Buffer[25];
-
-	// If this axis is being trimmed, the heading is in white
-	if (Trim) {
-		SetTextColor(hDC, RGB(255, 255, 255));
-	}
-	
-	TextOut(hDC, 5, CurrentLine, Heading, strlen(Heading));
-	
-	// Reset the text color
-	SetTextColor(hDC, RGB(0, 255, 0));
-	
-	ScaleOutput(Buffer, Rate);
-
-	// Adjust for negative number
-	if (Rate < 0) {
-		ScaleOutput(Buffer, Rate);
-
-		if (ColorMode == COLOR_WHITE) {
-			//sprintf(Buffer, "%.2f", DEG * Rate);
-			SetTextColor(hDC, RGB(255, 255, 255));
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else if (ColorMode == COLOR_RED) {
-			//sprintf(Buffer, "%.2f", DEG * Rate);
-			SetTextColor(hDC, RGB(255, 0, 0));
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-			SetTextColor(hDC, RGB(0, 255, 0));
-		} else {
-			//sprintf(Buffer, "%.2f", DEG * Rate);
-			TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-		} 
-	} else {
-		// Add + sign
-		Buffer[0] = '+';
-		ScaleOutput(&Buffer[1], Rate);
-		TextOut(hDC, TAB, CurrentLine, Buffer, strlen(Buffer));
-	}
-
-	CurrentLine += LINE;
-}
 
 // Note: This is not part of class AttitudeMFD
 void PrintRect(HDC hDC, int StartX, int StartY, int Width, int Height)
@@ -836,227 +409,178 @@ void PrintArc(HDC hDC, int X, int Y, int Radius, int InnerRadius, double InitAng
 	LineTo(hDC, X + (Radius * cos(Radians(InitAngle))), Y - (Radius * sin(Radians(InitAngle))));
 }
 
-void AttitudeMFD::PrintPitchThrustLevel(double Level)
-{
-	HBRUSH OldBrush; 
+//void AttitudeMFD::PrintPitchThrustLevel(double Level)
+//{
+//	HBRUSH OldBrush; 
+//
+//	const int DISPLAY_START_X = 25, DISPLAY_START_Y = CurrentLine, 
+//				DISPLAY_WIDTH = LINE, DISPLAY_HEIGHT = 90, 
+//				DISPLAY_MID_X = DISPLAY_START_X + (DISPLAY_WIDTH/2),
+//				DISPLAY_MID_Y = DISPLAY_START_Y + (DISPLAY_HEIGHT/2);
+//
+//
+//	// Print the overlaying display box
+//	PrintRect(hDC, DISPLAY_START_X, DISPLAY_START_Y, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+//
+//	// The color of the brush depends on if the thrust level is positive or negative
+//	if (Level >= 0) {
+//		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrush);
+//	} else {
+//		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrushNeg);		
+//	}
+//	
+//	BeginPath(hDC);
+//	PrintRect(hDC, DISPLAY_START_X, DISPLAY_MID_Y, DISPLAY_WIDTH, -((DISPLAY_HEIGHT/2) * Level)); 
+//	EndPath(hDC);
+//	StrokeAndFillPath(hDC);
+//
+//
+//	// Return to the original brush
+//	SelectObject(hDC, OldBrush);
+//
+//
+//}
+//
 
-	const int DISPLAY_START_X = 25, DISPLAY_START_Y = CurrentLine, 
-				DISPLAY_WIDTH = LINE, DISPLAY_HEIGHT = 90, 
-				DISPLAY_MID_X = DISPLAY_START_X + (DISPLAY_WIDTH/2),
-				DISPLAY_MID_Y = DISPLAY_START_Y + (DISPLAY_HEIGHT/2);
+//void AttitudeMFD::PrintYawThrustLevel(double Level)
+//{
+//	HBRUSH OldBrush; 
+//	const int DISPLAY_START_X = 70, DISPLAY_START_Y = CurrentLine + (45 - (LINE / 2)), 
+//				DISPLAY_WIDTH = 90, DISPLAY_HEIGHT = LINE, 
+//				DISPLAY_MID_X = DISPLAY_START_X + (DISPLAY_WIDTH/2),
+//				DISPLAY_MID_Y = DISPLAY_START_Y + (DISPLAY_HEIGHT/2);
+//
+//
+//	// Print the overlaying display box
+//	PrintRect(hDC, DISPLAY_START_X, DISPLAY_START_Y, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+//
+//	// The color of the brush depends on if the thrust level is positive or negative
+//	if (Level >= 0) {
+//		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrush);
+//	} else {
+//		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrushNeg);		
+//	}
+//	
+//	BeginPath(hDC);
+//	PrintRect(hDC, DISPLAY_MID_X, DISPLAY_START_Y, ((DISPLAY_WIDTH/2) * Level), DISPLAY_HEIGHT); 
+//	EndPath(hDC);
+//	StrokeAndFillPath(hDC);
+//
+//
+//	// Return to the original brush
+//	SelectObject(hDC, OldBrush);
+//
+//
+//}
 
+//void AttitudeMFD::PrintRollThrustLevel(double Level)
+//{
+//	HBRUSH OldBrush; 
+//
+//	const int DISPLAY_START_X = 225, DISPLAY_START_Y = CurrentLine + 70, 
+//				DISPLAY_WIDTH = LINE, DISPLAY_HEIGHT = 90, 
+//				DISPLAY_MID_X = DISPLAY_START_X + (DISPLAY_WIDTH/2),
+//				DISPLAY_MID_Y = DISPLAY_START_Y + (DISPLAY_HEIGHT/2);
+//
+//
+//	PrintArc(hDC, DISPLAY_START_X, DISPLAY_START_Y, 45, 45 - LINE, 179.0, -180.0);
+//
+//	// The color of the brush depends on if the thrust level is positive or negative
+//	if (Level >= 0) {
+//		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrush);
+//	} else {
+//		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrushNeg);		
+//	}
+//	
+//	BeginPath(hDC);
+//	PrintArc(hDC, DISPLAY_START_X, DISPLAY_START_Y, 45, 45 - LINE, 90.0, -(90.0 * Level)); 
+//	EndPath(hDC);
+//	StrokeAndFillPath(hDC);
+//
+//
+//	// Return to the original brush
+//	SelectObject(hDC, OldBrush);
+//
+//
+//}
+//
+//void AttitudeMFD::PrintRotThrust()
+//{
+//	char Buffer[100];
+//	int START_LINE = LINE * 17;
+//	
+//	if (CurrentLine < START_LINE) {
+//		CurrentLine = START_LINE;
+//	}
+//
+//	MoveToEx(hDC, 0, CurrentLine, NULL);
+//	LineTo(hDC, Width, CurrentLine);
+//	MoveToEx(hDC, 60, CurrentLine, NULL);
+//	LineTo(hDC, 60, Height);
+//	MoveToEx(hDC, 170, CurrentLine, NULL);
+//	LineTo(hDC, 170, Height);
+//
+//	CurrentLine += LINE / 4;
+//
+//	SetTextColor(hDC, RGB(255, 255, 255));
+//
+//	sprintf(Buffer, "%s", "Pitch");
+//	TextOut(hDC, 10, CurrentLine, Buffer, strlen(Buffer));
+//	sprintf(Buffer, "%s", "Yaw");
+//	TextOut(hDC, 105, CurrentLine, Buffer, strlen(Buffer));
+//	sprintf(Buffer, "%s", "Roll");
+//	TextOut(hDC, 205, CurrentLine, Buffer, strlen(Buffer));
+//	SetTextColor(hDC, RGB(0, 255, 0));
+//
+//	CurrentLine += 1.5 * LINE;
+//	MoveToEx(hDC, 0, CurrentLine, NULL);
+//	LineTo(hDC, Width, CurrentLine);
+//	CurrentLine += LINE;
+//
+//	/*PrintPitchThrustLevel(RotLevel.data[PITCH]);
+//	PrintYawThrustLevel(RotLevel.data[YAW]);
+//	PrintRollThrustLevel(RotLevel.data[ROLL]);*/
+//
+//}
 
-	// Print the overlaying display box
-	PrintRect(hDC, DISPLAY_START_X, DISPLAY_START_Y, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-
-	// The color of the brush depends on if the thrust level is positive or negative
-	if (Level >= 0) {
-		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrush);
-	} else {
-		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrushNeg);		
-	}
-	
-	BeginPath(hDC);
-	PrintRect(hDC, DISPLAY_START_X, DISPLAY_MID_Y, DISPLAY_WIDTH, -((DISPLAY_HEIGHT/2) * Level)); 
-	EndPath(hDC);
-	StrokeAndFillPath(hDC);
-
-
-	// Return to the original brush
-	SelectObject(hDC, OldBrush);
-
-
-}
-
-
-void AttitudeMFD::PrintYawThrustLevel(double Level)
-{
-	HBRUSH OldBrush; 
-	const int DISPLAY_START_X = 70, DISPLAY_START_Y = CurrentLine + (45 - (LINE / 2)), 
-				DISPLAY_WIDTH = 90, DISPLAY_HEIGHT = LINE, 
-				DISPLAY_MID_X = DISPLAY_START_X + (DISPLAY_WIDTH/2),
-				DISPLAY_MID_Y = DISPLAY_START_Y + (DISPLAY_HEIGHT/2);
-
-
-	// Print the overlaying display box
-	PrintRect(hDC, DISPLAY_START_X, DISPLAY_START_Y, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-
-	// The color of the brush depends on if the thrust level is positive or negative
-	if (Level >= 0) {
-		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrush);
-	} else {
-		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrushNeg);		
-	}
-	
-	BeginPath(hDC);
-	PrintRect(hDC, DISPLAY_MID_X, DISPLAY_START_Y, ((DISPLAY_WIDTH/2) * Level), DISPLAY_HEIGHT); 
-	EndPath(hDC);
-	StrokeAndFillPath(hDC);
-
-
-	// Return to the original brush
-	SelectObject(hDC, OldBrush);
-
-
-}
-
-void AttitudeMFD::PrintRollThrustLevel(double Level)
-{
-	HBRUSH OldBrush; 
-
-	const int DISPLAY_START_X = 225, DISPLAY_START_Y = CurrentLine + 70, 
-				DISPLAY_WIDTH = LINE, DISPLAY_HEIGHT = 90, 
-				DISPLAY_MID_X = DISPLAY_START_X + (DISPLAY_WIDTH/2),
-				DISPLAY_MID_Y = DISPLAY_START_Y + (DISPLAY_HEIGHT/2);
-
-
-	PrintArc(hDC, DISPLAY_START_X, DISPLAY_START_Y, 45, 45 - LINE, 179.0, -180.0);
-
-	// The color of the brush depends on if the thrust level is positive or negative
-	if (Level >= 0) {
-		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrush);
-	} else {
-		OldBrush = (HBRUSH)SelectObject(hDC, ThrusterBrushNeg);		
-	}
-	
-	BeginPath(hDC);
-	PrintArc(hDC, DISPLAY_START_X, DISPLAY_START_Y, 45, 45 - LINE, 90.0, -(90.0 * Level)); 
-	EndPath(hDC);
-	StrokeAndFillPath(hDC);
-
-
-	// Return to the original brush
-	SelectObject(hDC, OldBrush);
-
-
-}
-
-void AttitudeMFD::PrintRotThrust()
-{
-	char Buffer[100];
-	int START_LINE = LINE * 17;
-	
-	if (CurrentLine < START_LINE) {
-		CurrentLine = START_LINE;
-	}
-
-	MoveToEx(hDC, 0, CurrentLine, NULL);
-	LineTo(hDC, Width, CurrentLine);
-	MoveToEx(hDC, 60, CurrentLine, NULL);
-	LineTo(hDC, 60, Height);
-	MoveToEx(hDC, 170, CurrentLine, NULL);
-	LineTo(hDC, 170, Height);
-
-	CurrentLine += LINE / 4;
-
-	SetTextColor(hDC, RGB(255, 255, 255));
-
-	sprintf(Buffer, "%s", "Pitch");
-	TextOut(hDC, 10, CurrentLine, Buffer, strlen(Buffer));
-	sprintf(Buffer, "%s", "Yaw");
-	TextOut(hDC, 105, CurrentLine, Buffer, strlen(Buffer));
-	sprintf(Buffer, "%s", "Roll");
-	TextOut(hDC, 205, CurrentLine, Buffer, strlen(Buffer));
-	SetTextColor(hDC, RGB(0, 255, 0));
-
-	CurrentLine += 1.5 * LINE;
-	MoveToEx(hDC, 0, CurrentLine, NULL);
-	LineTo(hDC, Width, CurrentLine);
-	CurrentLine += LINE;
-
-	PrintPitchThrustLevel(RotLevel.data[PITCH]);
-	PrintYawThrustLevel(RotLevel.data[YAW]);
-	PrintRollThrustLevel(RotLevel.data[ROLL]);
-
-}
-
-void AttitudeMFD::PrintRelVel()
-{
-	bool TrimVert = false,
-			TrimLat = false,
-			TrimFA = false;
-
-	if (TrimStatus == T_ENGAGED) {
-		if (TrimMode == T_VERT || 
-			TrimMode == T_ALL || 
-			TrimMode == T_VERT_LAT ||
-			TrimMode == T_VERT_FA) {
-			TrimVert = true;
-		}
-
-		 if (TrimMode == T_LAT ||
-			 TrimMode == T_ALL ||
-			 TrimMode == T_VERT_LAT ||
-			 TrimMode == T_LAT_FA) {
-			TrimLat = true;
-		 }
-
-		if (TrimMode == T_FA || 
-			 TrimMode == T_ALL ||
-			 TrimMode == T_LAT_FA ||
-			TrimMode == T_VERT_FA) {
-			TrimFA = true;
-		}
-	}
-
-	PrintRate("Vertical", RelVel.y, TrimVert);
-	PrintRate("Lateral", RelVel.x, TrimLat);
-	PrintRate("Fore/Aft", RelVel.z, TrimFA);
-}
-
-bool inline AttitudeMFD::HaveMainEngine()
-{
-	return MaxMainThrust > 0;
-}
-
-bool inline AttitudeMFD::HaveRetroEngine()
-{
-	return MaxRetroThrust > 0;
-}
-
-bool inline AttitudeMFD::HaveHoverEngine()
-{
-	return MaxHoverThrust > 0;
-}
-
-bool cbSetRelAttPitch(void *id, char *str, void *data)
-{
-	return (((AttitudeMFD *)data)->SetRelAttitude(str, PITCH));
-}
-
-bool cbSetRelAttYaw(void *id, char *str, void *data)
-{
-	return (((AttitudeMFD *)data)->SetRelAttitude(str, YAW));
-}
-
-bool cbSetRelAttRoll(void *id, char *str, void *data)
-{
-	return (((AttitudeMFD *)data)->SetRelAttitude(str, ROLL));
-}
-
-bool cbSetMode(void *id, char *str, void *data)
-{
-	REF_MODE Mode = (REF_MODE)atoi(str);
-
-	if (Mode >= USER_ATT && Mode <= EI) {
-		((AttitudeMFD *)data)->ChangeRefMode(Mode);
-		return true;
-	}
-
-	return false;
-}
-
-bool AttitudeMFD::SetRelAttitude(char *str, AXIS Axis)
-{
-	// This allows a space to represent a decimal point
-	for (unsigned int i = 0; i < strlen(str); i++) {
-		if (str[i] == ' ') {
-			str[i] = '.';
-			break;
-		}
-	}
-
-	RelAttitude.data[Axis] = Radians(atof(str));
-	return true;
-}
+//bool cbSetRelAttPitch(void *id, char *str, void *data)
+//{
+//	return (((AttitudeMFD *)data)->SetRelAttitude(str, PITCH));
+//}
+//
+//bool cbSetRelAttYaw(void *id, char *str, void *data)
+//{
+//	return (((AttitudeMFD *)data)->SetRelAttitude(str, YAW));
+//}
+//
+//bool cbSetRelAttRoll(void *id, char *str, void *data)
+//{
+//	return (((AttitudeMFD *)data)->SetRelAttitude(str, ROLL));
+//}
+//
+//bool cbSetMode(void *id, char *str, void *data)
+//{
+//	REF_MODE Mode = (REF_MODE)atoi(str);
+//
+//	if (Mode >= USER_ATT && Mode <= EI) {
+//		((AttitudeMFD *)data)->ChangeRefMode(Mode);
+//		return true;
+//	}
+//
+//	return false;
+//}
+//
+//bool AttitudeMFD::SetRelAttitude(char *str, AXIS Axis)
+//{
+//	// This allows a space to represent a decimal point
+//	for (unsigned int i = 0; i < strlen(str); i++) {
+//		if (str[i] == ' ') {
+//			str[i] = '.';
+//			break;
+//		}
+//	}
+//
+//	RelAttitude.data[Axis] = Radians(atof(str));
+//	return true;
+//}
 
