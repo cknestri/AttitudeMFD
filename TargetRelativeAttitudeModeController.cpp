@@ -111,11 +111,11 @@ void TargetRelativeAttitudeModeController::DisableAutopilot()
 	m_autopilot->ShutdownAllEngines();
 }
 
-void TargetRelativeAttitudeModeController::Control()
+void TargetRelativeAttitudeModeController::Control(double deltaTime)
 {
 	if (m_isAutopilotEngaged)
 	{
-		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawAngles, DB_FINE, 1.0);
+		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawAngles, DB_FINE, deltaTime);
 	}
 
 	if (m_trimState.IsEnabled())

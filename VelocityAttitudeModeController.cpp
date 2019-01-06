@@ -135,11 +135,11 @@ void VelocityAttitudeModeController::DisableAutopilot()
 	m_autopilot->ShutdownAllEngines();
 }
 
-void VelocityAttitudeModeController::Control()
+void VelocityAttitudeModeController::Control(double deltaTime)
 {
 	if (m_isAutopilotEngaged)
 	{
-		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawRollAngles, DB_FINE, 1.0);
+		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawRollAngles, DB_FINE, deltaTime);
 	}
 }
 

@@ -20,7 +20,7 @@ public:
 	void UpdateState() override;
 	void EnableAutopilot();
 	void DisableAutopilot();
-	void Control() override;
+	void Control(double deltaTime) override;
 	int GetButtonMenu(const MFDBUTTONMENU** buttonMenu) const override;
 	bool ProcessKey(DWORD key);
 

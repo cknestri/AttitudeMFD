@@ -235,16 +235,16 @@ void inline AttitudeMFD::UpdateState(double TimeStep)
 
 	m_attitudeModeController->UpdateState();
 
-	Control();
+	Control(TimeElapsed);
 
 	// Reset time
 	TimeElapsed = 0.0;
 }
 
 
-void AttitudeMFD::Control()
+void AttitudeMFD::Control(double deltaTime)
 {
-	m_attitudeModeController->Control();
+	m_attitudeModeController->Control(deltaTime);
 }
 
 

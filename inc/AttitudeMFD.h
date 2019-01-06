@@ -55,7 +55,7 @@ private:
 	void InitializeCommandMap();
 	void BuildButtonMenu();
 	bool ProcessKey(DWORD key);
-	void Control();
+	void Control(double deltaTime);
 	
 	void ToggleColorMode();
 	void ToggleAttHoldMode();
