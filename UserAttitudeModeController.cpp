@@ -40,20 +40,8 @@ bool UserAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 
 	display->Reset();
 	
-	display->SetTextColor(RGB(255, 255, 255));
-	display->DisplayText("Attitude MFD");
-	display->SetTextColor(RGB(0, 255, 0));
-	display->PrintNewline();
-
-	if (m_isAutopilotEngaged)
-	{
-		display->DisplayText("Ref Mode: Attitude (Hold)");
-	}
-	else
-	{
-		display->DisplayText("Ref Mode: Attitude");
-	}
-
+	PrintMFDName(display);
+	PrintReferenceMode(display, "Attitude", m_isAutopilotEngaged);
 
 	display->DisplayText(
 		"Reference Att: %.1f %.1f %.1f", 

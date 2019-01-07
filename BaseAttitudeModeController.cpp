@@ -15,3 +15,26 @@ BaseAttitudeModeControl::~BaseAttitudeModeControl()
 {
 
 }
+
+void BaseAttitudeModeControl::PrintMFDName(const std::shared_ptr<IDisplay>& display) const
+{
+	display->SetTextColor(RGB(255, 255, 255));
+	display->DisplayText("Attitude MFD");
+	display->SetTextColor(RGB(0, 255, 0));
+	display->PrintNewline();
+}
+
+void BaseAttitudeModeControl::PrintReferenceMode(const std::shared_ptr<IDisplay>& display, const char * referenceMode, bool isAutopilotEngaged) const
+{
+	char* holdString = "";
+
+	if (isAutopilotEngaged)
+	{
+		holdString = " (Hold)";
+	}
+	
+	display->DisplayText("Ref Mode: %s%s", referenceMode, holdString);
+	display->PrintNewline();
+}
+
+

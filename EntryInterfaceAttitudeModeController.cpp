@@ -56,13 +56,8 @@ bool EntryInterfaceAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 
 	display->Reset();
 	
-	display->SetTextColor(RGB(255, 255, 255));
-	display->DisplayText("Attitude MFD");
-	display->SetTextColor(RGB(0, 255, 0));
-	display->PrintNewline();
-
-	display->DisplayText("Ref Mode: Entry Interface");
-	display->PrintNewline();
+	PrintMFDName(display);
+	PrintReferenceMode(display, "Entry Interface", m_isAutopilotEngaged);
 
 	if (!m_entryInterface.InterfaceDefined)
 	{

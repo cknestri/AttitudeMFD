@@ -23,4 +23,7 @@ protected:
 	VESSEL* m_spacecraft;
 	std::shared_ptr<IAutopilot> m_autopilot;
 	CreateDisplayFunction m_createDisplay;
+
+	void PrintMFDName(const std::shared_ptr<IDisplay>& display) const;
+	void PrintReferenceMode(const std::shared_ptr<IDisplay>& display, const char* referenceMode, bool isAutopilotEngaged) const;
 };

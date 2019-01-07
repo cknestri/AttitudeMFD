@@ -54,13 +54,8 @@ bool VelocityAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 
 	display->Reset();
 	
-	display->SetTextColor(RGB(255, 255, 255));
-	display->DisplayText("Attitude MFD");
-	display->SetTextColor(RGB(0, 255, 0));
-	display->PrintNewline();
-
-	display->DisplayText("Ref Mode: Velocity");
-	display->PrintNewline();
+	PrintMFDName(display);
+	PrintReferenceMode(display, "Velocity", m_isAutopilotEngaged);
 
 	display->PrintAngle("Set Pitch", m_relativeAttitude.data[PITCH]);
 	display->PrintAngle("Set Yaw ", m_relativeAttitude.data[YAW]);
