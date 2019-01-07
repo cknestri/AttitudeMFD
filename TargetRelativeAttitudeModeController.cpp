@@ -67,13 +67,7 @@ bool TargetRelativeAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	display->PrintAngleAndRate("Yaw:", m_pitchYawAngles.data[YAW], m_status.vrot.y);
 	display->PrintNewline();
 
-	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[VERTICAL]);
-	display->DisplayText("Vertical:           %s", scaledValueBuffer);
-	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[LATERAL]);
-	display->DisplayText("Lateral:            %s", scaledValueBuffer);
-	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[FORE_AFT]);
-	display->DisplayText("Fore/Aft:           %s", scaledValueBuffer);
-	display->PrintNewline();
+	PrintRelativeVelocity(display);
 
 	return true;
 }
@@ -275,6 +269,19 @@ void TargetRelativeAttitudeModeController::SelectClosestTarget()
 
 	m_selectedTargetIndex = 0;
 	oapiGetObjectName(m_targetList[m_selectedTargetIndex], m_targetName, sizeof(m_targetName));
+}
+
+void TargetRelativeAttitudeModeController::PrintRelativeVelocity(const std::shared_ptr<IDisplay>& display) const
+{
+	char scaledValueBuffer[100];
+
+	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[VERTICAL]);
+	display->DisplayText("Vertical:           %s", scaledValueBuffer);
+	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[LATERAL]);
+	display->DisplayText("Lateral:            %s", scaledValueBuffer);
+	ScaleOutput(scaledValueBuffer, m_relativeVelocity.data[FORE_AFT]);
+	display->DisplayText("Fore/Aft:           %s", scaledValueBuffer);
+	display->PrintNewline();
 }
 
 //void inline AttitudeMFD::SetTrimLevelVert()

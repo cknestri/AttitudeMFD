@@ -52,4 +52,6 @@ private:
 	void SelectNextTarget();
 	void SelectPreviousTarget();
 	void SelectClosestTarget();
+	
+	void PrintRelativeVelocity(const std::shared_ptr<IDisplay>& display) const;
 };
