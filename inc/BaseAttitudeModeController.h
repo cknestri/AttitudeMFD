@@ -26,4 +26,6 @@ protected:
 
 	void PrintMFDName(const std::shared_ptr<IDisplay>& display) const;
 	void PrintReferenceMode(const std::shared_ptr<IDisplay>& display, const char* referenceMode, bool isAutopilotEngaged) const;
+	void PrintRelativeAttitude(const std::shared_ptr<IDisplay>& display, const Attitude& relativeAttitude) const;
+
 };

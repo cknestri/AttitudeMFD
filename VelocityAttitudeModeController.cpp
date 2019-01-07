@@ -56,11 +56,7 @@ bool VelocityAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	
 	PrintMFDName(display);
 	PrintReferenceMode(display, "Velocity", m_isAutopilotEngaged);
-
-	display->PrintAngle("Set Pitch", m_relativeAttitude.data[PITCH]);
-	display->PrintAngle("Set Yaw ", m_relativeAttitude.data[YAW]);
-	display->PrintAngle("Set Roll", m_relativeAttitude.data[ROLL]);
-	display->PrintNewline();
+	PrintRelativeAttitude(display, m_relativeAttitude);
 
 	display->PrintAngleAndRate("Pitch:", m_pitchYawRollAngles.data[PITCH], m_status.vrot.x);
 	display->PrintAngleAndRate("Yaw:", m_pitchYawRollAngles.data[YAW], m_status.vrot.y);

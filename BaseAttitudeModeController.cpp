@@ -37,4 +37,12 @@ void BaseAttitudeModeControl::PrintReferenceMode(const std::shared_ptr<IDisplay>
 	display->PrintNewline();
 }
 
+void BaseAttitudeModeControl::PrintRelativeAttitude(const std::shared_ptr<IDisplay>& display, const Attitude& relativeAttitude) const
+{
+	display->PrintAngle("Set Pitch", relativeAttitude.data[PITCH]);
+	display->PrintAngle("Set Yaw ", relativeAttitude.data[YAW]);
+	display->PrintAngle("Set Roll", relativeAttitude.data[ROLL]);
+	display->PrintNewline();
+}
+
 

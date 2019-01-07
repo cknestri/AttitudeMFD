@@ -55,11 +55,8 @@ bool UserAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 		DEG * m_status.arot.z );
 	display->PrintNewline();
 
-	display->PrintAngle("Set Pitch", m_relativeAttitude.data[PITCH]);
-	display->PrintAngle("Set Yaw ", m_relativeAttitude.data[YAW]);
-	display->PrintAngle("Set Roll", m_relativeAttitude.data[ROLL]);
+	PrintRelativeAttitude(display, m_relativeAttitude);
 
-	display->PrintNewline();
 	display->PrintNewline();
 
 	display->PrintAngleAndRate("Pitch:", m_pitchYawRollAngles.data[PITCH], m_status.vrot.x);

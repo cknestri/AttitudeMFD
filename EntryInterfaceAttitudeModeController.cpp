@@ -70,11 +70,8 @@ bool EntryInterfaceAttitudeModeController::Update(oapi::Sketchpad* sketchpad)
 	display->DisplayText("Time To Go:    %.f", m_entryInterface.TimeToGo);
 	display->PrintNewline();
 
-	display->PrintAngle("Set Pitch", m_relativeAttitude.data[PITCH]);
-	display->PrintAngle("Set Yaw ", m_relativeAttitude.data[YAW]);
-	display->PrintAngle("Set Roll", m_relativeAttitude.data[ROLL]);
-	display->PrintNewline();
-
+	PrintRelativeAttitude(display, m_relativeAttitude);
+	
 	display->PrintAngleAndRate("Pitch:", m_pitchYawRollAngles.data[PITCH], m_status.vrot.x);
 	display->PrintAngleAndRate("Yaw:", m_pitchYawRollAngles.data[YAW], m_status.vrot.y);
 	display->PrintAngleAndRate("Roll:", m_pitchYawRollAngles.data[ROLL], m_status.vrot.z);
