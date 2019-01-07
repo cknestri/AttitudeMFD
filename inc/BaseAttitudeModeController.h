@@ -28,4 +28,7 @@ protected:
 	void PrintReferenceMode(const std::shared_ptr<IDisplay>& display, const char* referenceMode, bool isAutopilotEngaged) const;
 	void PrintRelativeAttitude(const std::shared_ptr<IDisplay>& display, const Attitude& relativeAttitude) const;
 
+	VECTOR3 CalcPitchYawRollAngles(const Attitude& referenceAttitude);
+	static VECTOR3 GetPYR(VECTOR3 Pitch, VECTOR3 YawRoll);
+	static VECTOR3 GetReferenceAttitude(VECTOR3 Pitch, VECTOR3 YawRoll);
 };

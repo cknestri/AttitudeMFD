@@ -25,7 +25,6 @@ public:
 
 private:
 	VESSELSTATUS m_status;
-	VECTOR3 m_globalSpacecraftPosition;
 	VECTOR3 m_pitchYawRollAngles;
 	Attitude m_referenceAttitude;
 	Attitude m_relativeAttitude;
@@ -36,6 +35,4 @@ private:
 	void InitializeCommandMap();
 	void CalculateAttitude();
 	void SetReferenceAttitude();
-	VECTOR3 CalcPitchYawRollAngles();
-	VECTOR3 GetPYR(VECTOR3 Pitch, VECTOR3 YawRoll);
 };
