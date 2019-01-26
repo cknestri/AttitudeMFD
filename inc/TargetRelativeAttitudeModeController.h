@@ -38,6 +38,7 @@ private:
 	VECTOR3 m_relativeVelocity;
 	double m_radialVelocity;
 	VECTOR3 m_pitchYawAngles;
+	VECTOR3 m_baseRotationRate;
 
 	TrimState m_trimState;
 
@@ -52,6 +53,7 @@ private:
 	void SelectNextTarget();
 	void SelectPreviousTarget();
 	void SelectClosestTarget();
+	void SetBaseRotationRate();
 	
 	void PrintRelativeVelocity(const std::shared_ptr<IDisplay>& display) const;
 };

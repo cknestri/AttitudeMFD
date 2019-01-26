@@ -10,6 +10,7 @@ VelocityAttitudeModeController::VelocityAttitudeModeController(
 	: BaseAttitudeModeControl(spacecraft, autopilot, createDisplay)
 	, m_referenceAttitude(NULL_VECTOR)
 	, m_relativeAttitude(NULL_VECTOR)
+	, m_baseRotationRate(NULL_VECTOR)
 {
 }
 
@@ -49,6 +50,8 @@ void VelocityAttitudeModeController::UpdateState()
 	m_referenceAttitude = GetReferenceAttitude(m_status.rvel, angularMomention);
 
 	m_pitchYawRollAngles = CalcPitchYawRollAngles(m_referenceAttitude);
+
+	m_baseRotationRate = CalculateBaseRotationRate();
 }
 
 void VelocityAttitudeModeController::EnableAutopilot()
@@ -66,7 +69,7 @@ void VelocityAttitudeModeController::Control(double deltaTime)
 {
 	if (m_isAutopilotEngaged)
 	{
-		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawRollAngles, DB_FINE, deltaTime);
+		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawRollAngles, m_baseRotationRate, DB_FINE, deltaTime);
 	}
 }
 
@@ -83,4 +86,19 @@ bool VelocityAttitudeModeController::ProcessKey(DWORD key)
 void VelocityAttitudeModeController::InitializeCommandMap()
 {
 
+}
+
+VECTOR3 VelocityAttitudeModeController::CalculateBaseRotationRate() const
+{
+	// Calculate the base rate at which the velocity vectory is changing
+	ELEMENTS_VEC Elements;
+	GetElements(Elements);
+
+	VECTOR3 baseRotationRate = NULL_VECTOR;
+
+	baseRotationRate.x = -(sqrt(GravBodyData[Elements.Body].Mu / Elements.p) * (1 + Elements.e * Elements.TrueAnomaly)) / Elements.r;
+	
+	//RotateVector(AngularRate, RelAttitude, AngularRate);
+
+	return baseRotationRate;
 }

@@ -88,7 +88,7 @@ void EntryInterfaceAttitudeModeController::Control(double deltaTime)
 {
 	if (m_isAutopilotEngaged)
 	{
-		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawRollAngles, DB_FINE, deltaTime);
+		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawRollAngles, NULL_VECTOR, DB_FINE, deltaTime);
 	}
 }
 

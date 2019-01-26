@@ -18,12 +18,14 @@ public:
 	virtual bool SetAttitude(
 		const VECTOR3& targetAttitude,
 		const VECTOR3& currentAttitude,
+		const VECTOR3& baseRotationRate,
 		DEADBAND deadBand,
 		double deltaTime) = 0;
 
 	virtual bool SetAttitudeInAxis(
 		double targetAttitude,
 		double currentAttitude,
+		double baseRotationRate,
 		AXIS axis,
 		DEADBAND deadBand,
 		double deltaTime) = 0;

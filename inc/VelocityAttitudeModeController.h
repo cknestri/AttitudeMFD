@@ -28,9 +28,11 @@ private:
 	Attitude m_referenceAttitude;
 	Attitude m_relativeAttitude;
 	VECTOR3 m_pitchYawRollAngles;
+	VECTOR3 m_baseRotationRate;
 	bool m_isAutopilotEngaged;
 
 	std::map<DWORD, std::function<void()>> m_commandMap;
 
 	void InitializeCommandMap();
+	VECTOR3 CalculateBaseRotationRate() const;
 };

@@ -18,6 +18,7 @@ struct TelemetryFrame
 {
 	VECTOR3 targetAttitude;
 	VECTOR3 currentAttitude;
+	VECTOR3 baseRotationRate;
 	VECTOR3 targetRotationRate;
 	VECTOR3 deltaRorationRate;
 	VECTOR3 roationRateDeadBand;
@@ -36,6 +37,7 @@ struct TelemetryFrame
 	{
 		log << targetAttitude.data[PITCH] << "," << targetAttitude.data[YAW] << "," << targetAttitude.data[ROLL] << ",";
 		log << currentAttitude.data[PITCH] << "," << currentAttitude.data[YAW] << "," << currentAttitude.data[ROLL] << ",";
+		log << baseRotationRate.data[PITCH] << "," << baseRotationRate.data[YAW] << "," << baseRotationRate.data[ROLL] << ",";
 		log << targetRotationRate.data[PITCH] << "," << targetRotationRate.data[YAW] << "," << targetRotationRate.data[ROLL] << ",";
 		log << deltaRorationRate.data[PITCH] << "," << deltaRorationRate.data[YAW] << "," << deltaRorationRate.data[ROLL] << ",";
 		log << roationRateDeadBand.data[PITCH] << "," << roationRateDeadBand.data[YAW] << "," << roationRateDeadBand.data[ROLL] << ",";
@@ -56,6 +58,7 @@ Autopilot::Autopilot(VESSEL* spacecraft)
 
 	m_log << "Target Attitude Pitch,Target Attitude Yaw, Target Attitude Roll,";
 	m_log << "Current Attitude Pitch,Current Attitude Yaw,Current Attitude Roll,";
+	m_log << "Base Rotation Rate Pitch, Base Rotation Rate Yaw, Base Rotation Rate Roll,";
 	m_log << "Target Rotation Rate Pitch, Target Rotation Rate Yaw, Target Rotation Rate Roll,";
 	m_log << "Delta RotationRate Pitch,Delta RotationRate Yaw,Delta RotationRate Roll,";
 	m_log << "Rotation Rate Deadband Pitch,Rotation Rate Deadband Yaw,Rotation Rate Deadband Roll,";
@@ -143,14 +146,15 @@ double Autopilot::GetThusterThrust(THGROUP_TYPE thrusterGroup, int thrusterIndex
 bool Autopilot::SetAttitude(
 	const VECTOR3& targetAttitude,
 	const VECTOR3& currentAttitude,
+	const VECTOR3& baseRotationRate,
 	DEADBAND deadBand,
 	double deltaTime)
 {
 	g_telemetryFrame.Clear();
 
-	auto isPitchSet = SetAttitudeInAxis(targetAttitude.data[PITCH], currentAttitude.data[PITCH], PITCH, deadBand, deltaTime);
-	auto isYawSet = SetAttitudeInAxis(targetAttitude.data[YAW], currentAttitude.data[YAW], YAW, deadBand, deltaTime);
-	auto isRollSet = SetAttitudeInAxis(targetAttitude.data[ROLL], currentAttitude.data[ROLL], ROLL, deadBand, deltaTime);
+	auto isPitchSet = SetAttitudeInAxis(targetAttitude.data[PITCH], currentAttitude.data[PITCH], baseRotationRate.data[PITCH], PITCH, deadBand, deltaTime);
+	auto isYawSet = SetAttitudeInAxis(targetAttitude.data[YAW], currentAttitude.data[YAW], baseRotationRate.data[YAW], YAW, deadBand, deltaTime);
+	auto isRollSet = SetAttitudeInAxis(targetAttitude.data[ROLL], currentAttitude.data[ROLL], baseRotationRate.data[ROLL], ROLL, deadBand, deltaTime);
 
 	g_telemetryFrame.Print(m_log);
 
@@ -160,6 +164,7 @@ bool Autopilot::SetAttitude(
 bool Autopilot::SetAttitudeInAxis(
 	double targetAttitude,
 	double currentAttitude,
+	double baseRotationRate,
 	AXIS axis,
 	DEADBAND deadBand,
 	double deltaTime)
@@ -168,15 +173,16 @@ bool Autopilot::SetAttitudeInAxis(
 
 	g_telemetryFrame.targetAttitude.data[axis] = DEG * targetAttitude;
 	g_telemetryFrame.currentAttitude.data[axis] = DEG * currentAttitude;
+	g_telemetryFrame.baseRotationRate.data[axis] = DEG * baseRotationRate;
 
 	// Let's take care of the good case first :-)
 	if (IsDeltaValueWithinDeadband(deltaAngle, deadBand))
 	{
-		return NullRotationRateInAxis(axis, deltaTime);
+		return NullRotationRateInAxis(axis, baseRotationRate, deltaTime);
 	}
 	else
 	{
-		double targetRotationRate = GetTargetRotationRate(deltaAngle);
+		double targetRotationRate = GetTargetRotationRate(deltaAngle, baseRotationRate);
 
 		return SetRotationRateInAxis(axis, targetRotationRate, deltaTime);
 	}
@@ -228,9 +234,9 @@ void Autopilot::ShutdownAllEngines()
 	ShutdownTranslationThrustersInAxis(FORE_AFT);
 }
 
-bool Autopilot::NullRotationRateInAxis(AXIS axis, double deltaTime)
+bool Autopilot::NullRotationRateInAxis(AXIS axis, double rotationRate, double deltaTime)
 {
-	return SetRotationRateInAxis(axis, 0, deltaTime);
+	return SetRotationRateInAxis(axis, rotationRate, deltaTime);
 }
 
 bool Autopilot::IsDeltaValueWithinDeadband(double deltaValue, double deadband) const
@@ -272,7 +278,7 @@ void Autopilot::ShutdownRotationThrustersInAxis(AXIS axis)
 	}
 }
 
-double Autopilot::GetTargetRotationRate(double deltaAngle) const 
+double Autopilot::GetTargetRotationRate(double deltaAngle, double baseRotationRate) const 
 {
 	double rotationRateMagnitude = 0.0;
 
@@ -297,14 +303,18 @@ double Autopilot::GetTargetRotationRate(double deltaAngle) const
 		rotationRateMagnitude = RATE_MAX;
 	}
 
+	double rotationRate = 0.0;
+
 	if (deltaAngle >= 0)
 	{
-		return rotationRateMagnitude;
+		rotationRate = rotationRateMagnitude;
 	}
 	else
 	{
-		return -rotationRateMagnitude;
+		rotationRate = -rotationRateMagnitude;
 	}
+
+	return rotationRate + baseRotationRate;
 }
 
 THGROUP_TYPE Autopilot::GetThrusterGroupForRotationInAxis(AXIS axis, double rotationRate) const

@@ -29,6 +29,7 @@ TargetRelativeAttitudeModeController::TargetRelativeAttitudeModeController(
 	, m_relativeVelocity(NULL_VECTOR)
 	, m_radialVelocity(0.0)
 	, m_pitchYawAngles(NULL_VECTOR)
+	, m_baseRotationRate(NULL_VECTOR)
 {
 	InitializeCommandMap();
 }
@@ -81,6 +82,8 @@ void TargetRelativeAttitudeModeController::UpdateState()
 	SetRadialVelocityToSelectedTarget();
 
 	m_pitchYawAngles = GetPY(m_relativePosition);
+
+	SetBaseRotationRate();
 }
 
 void TargetRelativeAttitudeModeController::EnableAutopilot()
@@ -98,7 +101,7 @@ void TargetRelativeAttitudeModeController::Control(double deltaTime)
 {
 	if (m_isAutopilotEngaged)
 	{
-		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawAngles, DB_FINE, deltaTime);
+		m_autopilot->SetAttitude(NULL_VECTOR, m_pitchYawAngles, m_baseRotationRate, DB_FINE, deltaTime);
 	}
 
 	if (m_trimState.IsEnabled())
@@ -269,6 +272,26 @@ void TargetRelativeAttitudeModeController::SelectClosestTarget()
 
 	m_selectedTargetIndex = 0;
 	oapiGetObjectName(m_targetList[m_selectedTargetIndex], m_targetName, sizeof(m_targetName));
+}
+
+void TargetRelativeAttitudeModeController::SetBaseRotationRate()
+{
+	m_baseRotationRate.x = -(1 / sqrt(1 - pow(m_relativePosition.y / Mag(m_relativePosition) ,2))) *
+					((Mag(m_relativePosition) * m_relativeVelocity.y - m_relativePosition.y * Mag(m_relativeVelocity)) / pow(Mag(m_relativePosition), 2));
+
+	double q = pow(m_relativePosition.x, 2) + pow(m_relativePosition.z, 2);
+	double dq = 2 * m_relativePosition.x * m_relativeVelocity.x + 2 * m_relativePosition.z * m_relativeVelocity.z;
+	double s = sqrt(q);
+	double ds = 1 / (2 * sqrt(q)) * dq;
+	double r = m_relativePosition.z / s;
+	double dr = (s * m_relativeVelocity.z - m_relativePosition.z * ds) / pow(s, 2);
+	double y = acos(r);
+
+	m_baseRotationRate.y = (-1 / sqrt(1 - pow(r, 2))) * dr;
+
+	if (m_relativePosition.x < 0) {
+		m_baseRotationRate.y = -m_baseRotationRate.y;
+	}
 }
 
 void TargetRelativeAttitudeModeController::PrintRelativeVelocity(const std::shared_ptr<IDisplay>& display) const

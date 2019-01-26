@@ -14,12 +14,14 @@ public:
 	bool SetAttitude(
 		const VECTOR3& targetAttitude,
 		const VECTOR3& currentAttitude,
+		const VECTOR3& baseRotationRate,
 		DEADBAND deadBand,
 		double deltaTime) override;
 
 	bool SetAttitudeInAxis(
 		double targetAttitude,
 		double currentAttitude,
+		double baseRotationRate,
 		AXIS axis,
 		DEADBAND deadBand,
 		double deltaTime) override;
@@ -45,13 +47,13 @@ private:
 	double GetThusterThrust(THGROUP_TYPE thrusterGroup, int thrusterIndex) const;
 
 	bool SetRotationRateInAxis(AXIS axis, double targetRotationRate, double deltaTime);
-	bool NullRotationRateInAxis(AXIS axis, double deltaTime);
+	bool NullRotationRateInAxis(AXIS axis, double rotationRate, double deltaTime);
 
 	bool IsDeltaValueWithinDeadband(double deltaValue, double deadband) const;
 	bool IsRotationRateZero(double rotationRate) const;
 	double GetRotationRateDeadband(double targetRotationRate) const;
 	void ShutdownRotationThrustersInAxis(AXIS axis);
-	double GetTargetRotationRate(double deltaAngle) const;
+	double GetTargetRotationRate(double deltaAngle, double rotationRate) const;
 	THGROUP_TYPE GetThrusterGroupForRotationInAxis(AXIS axis, double rotationRate) const;
 
 	bool IsRelativeVelocityWithinDeadBand(double relativeVelocity) const;
